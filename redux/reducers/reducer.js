@@ -27,13 +27,17 @@ const initialState= {
     columns: [ //각 컬럼의 속성과 기본 값들을 설정 가능
         {},
         {
-        type: 'dropdown',
-        selectOptions: ['Kia', 'Nissan', 'Toyota', 'Honda']
+            type: 'dropdown',
+            selectOptions: ['Kia', 'Nissan', 'Toyota', 'Honda']
         },
-        {},
         {
-        type: 'numeric',
-        format: '0,000',
+            type: 'checkbox',
+            checkOptions: ['want some?']
+            // checkOptions: ['bulgogi', 'kimchi', 'pajeon', 'samso']
+        },
+        {
+            type: 'numeric',
+            format: '0,000',
         },
         {}
     ],

@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
 import actionCreators from "../redux/actions/action";
 import DropdownSelection from "./dropdown";
+import CustomCheckbox from "./checkbox";
 
 
 class Columns extends React.Component {
@@ -93,8 +94,7 @@ class TableData extends React.Component {
                 break;
             case 'checkbox':
                 return  <Td colWidths={colWidths} draggable={true} >
-                            <input type="checkbox" id="subscribeNews" name="subscribe" value="newsletter" />
-                            <label for="subscribeNews">you want some?</label>
+                          <CustomCheckbox onChange={this.onChange} datum={datum} columnData={columnData} />
                         </Td>
                 break;
             case 'dropdown':
