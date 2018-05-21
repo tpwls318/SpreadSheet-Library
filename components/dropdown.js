@@ -13,7 +13,7 @@ const DropdownSelection = ({onChange, datum, columnData}) => {
   const options = columnData.selectOptions.map(e=>({key: e, text: e, value: e }));
   return (
     <Dropdown 
-      style={{ minWidth: 'auto' }} 
+      style={{ minWidth: 'auto', borderRadius: 15}} 
       className='dropdown' 
       defaultValue={ options.map(e=>e.value).includes(datum) ? datum : null}
       placeholder='Cars' 

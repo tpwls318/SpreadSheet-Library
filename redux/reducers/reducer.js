@@ -1,16 +1,9 @@
 // M
 
 //Reducer
-// const TIMER_DURATION = 1500;
-// const initialState = {
-//     isCounting: false,
-//     timerDuration: TIMER_DURATION,
-//     elapsedTime: 0,
-// } 
 const getData = (rows, cols) => {
-    return Array.from({ length: rows }, (e,i) => new Array(cols).fill(0).fill('kia',1,2) );
+    return Array.from({ length: rows }, (e,i) => new Array(cols).fill(0).fill('Kia',1,2) );
     // [[
-
     // ]]
 }
 // settings
@@ -41,6 +34,7 @@ const initialState= {
         },
         {}
     ],
+    cellState: Array.from({ length: 20 }, (e,i) => new Array(5).fill({}) ),
     cells: (col, row) => { //각 셀의 행과 열을 받아 접근할 수 있습니다.
     //col, row로 필드에 접근할 수 있습니다.
     },
@@ -64,6 +58,8 @@ function reducer(state = initialState, action){
     switch(action.type){
         case 'SAVE_DATA':
             return applySaveData(state, action.position, action.value);
+        case 'SAVE_STATE':
+            return applySaveState(state, action.position, action.key, action.value)
         default:
             return state;  
     }
@@ -79,6 +75,16 @@ const applySaveData = (state, position, value) =>
                 )          
             ) : e
         )),
+    })
+const applySaveState = (state, position, key, value) =>
+    ({
+        ...state,
+        cellState: state.cellState.map((eRow,i)=>(
+            i===position[0] ? eRow.map((eCol,i)=>(
+                i===position[1] ? {...eCol, [key]: value} : eCol
+                )          
+            ) : eRow
+        ))
     })
 
 // X Reducer

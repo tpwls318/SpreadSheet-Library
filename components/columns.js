@@ -11,7 +11,7 @@ import CustomCheckbox from "./checkbox";
 class Columns extends React.Component {
 
     render() {
-        const { index, data, colWidths, saveData, dispatch, columnData } = this.props;
+        const { index, data, colWidths, saveState, saveData, dispatch, columnData } = this.props;
         const rowIndex=index;
         return (
             <React.Fragment>
@@ -25,6 +25,7 @@ class Columns extends React.Component {
                             colWidths={colWidths[index]} 
                             datum={datum} 
                             saveData={saveData}
+                            saveState={saveState}
                             dispatch={dispatch}
                             columnData={columnData[index]}
                             />
@@ -43,8 +44,11 @@ class TableData extends React.Component {
             isText: true,
         }
     }
-    onClick = ()=>{this.setState( prevState =>({isSelected: !prevState.isSelected}))}
-    onChange = (e, data, format)=>{
+    onClick = async () => {
+        await this.setState( prevState =>({isSelected: !prevState.isSelected}))
+        this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', this.state.isSelected)
+    }
+    onChange = (e, data, format) => {
         e.preventDefault();
         data ? 
         this.props.saveData([this.state.rowIndex,this.state.colIndex], data.value ):
@@ -94,7 +98,12 @@ class TableData extends React.Component {
                 break;
             case 'checkbox':
                 return  <Td colWidths={colWidths} draggable={true} >
-                          <CustomCheckbox onChange={this.onChange} datum={datum} columnData={columnData} />
+                          <CustomCheckbox 
+                            saveData={saveData} 
+                            position={[this.state.rowIndex,this.state.colIndex]}
+                            datum={datum} 
+                            columnData={columnData} 
+                            />
                         </Td>
                 break;
             case 'dropdown':
@@ -123,6 +132,7 @@ const Td = styled.td`
 `
 const mapDispatchToProps = dispatch =>
     ({
+        saveState: bindActionCreators(actionCreators.saveState, dispatch),
         saveData: bindActionCreators(actionCreators.saveData, dispatch),
     })
 export default connect(null, mapDispatchToProps)(Columns);
