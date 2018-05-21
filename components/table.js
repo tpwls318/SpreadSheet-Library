@@ -5,6 +5,7 @@ import Header from "./header";
 import Row from "./row";
 import "../styles/table";
 import { connect } from 'react-redux';
+import ContextMenu from "./contextMenu";
 
 const mapStateToProps = (state) => {
     const { data, nestedHeaders, colWidths, columns } = state;
@@ -82,6 +83,7 @@ class Table extends React.Component {
         } = this.props;
         return (
             <div style={{overflowX: 'auto'}}>
+                <ContextMenu />
                 <table className="table">
                     <tbody >
                         {nestedHeaders.map(

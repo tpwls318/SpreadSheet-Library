@@ -6,6 +6,8 @@ import { bindActionCreators } from "redux";
 import actionCreators from "../redux/actions/action";
 import DropdownSelection from "./dropdown";
 import CustomCheckbox from "./checkbox";
+import DropdownMenu from "./dropdownMenu";
+import ContextMenu from "./contextMenu";
 
 
 class Columns extends React.Component {
@@ -42,6 +44,8 @@ class TableData extends React.Component {
             colIndex: props.colIndex,
             rowIndex: props.rowIndex,
             isText: true,
+            visible: false,
+            align: null
         }
     }
     onClick = async () => {
@@ -72,6 +76,9 @@ class TableData extends React.Component {
         }
         else formattedNumber=number+formattedNumber;
         return formattedNumber;
+    }
+    alignHandler = (e) => {
+        this.setState(prev=>({align:e}))
     }
     render() {
         console.log('props in TableData!!!!',this.props);
@@ -114,6 +121,10 @@ class TableData extends React.Component {
             default:
                 return <Td colWidths={colWidths} draggable={true} >
                     <input 
+                    ref={ref => {this.col = ref}}
+                    style={{textAlign: this.state.align}}
+                    onContextMenu={(e)=>{e.preventDefault();this.setState(prevState=>({visible: !prevState.visible}))}}
+                    onFocus={()=>this.setState(prevState=>({visible: !prevState.visible}))}
                     type='string' 
                     // step='1' 
                     // min="1" 
