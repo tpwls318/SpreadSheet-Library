@@ -1,4 +1,5 @@
 import React from 'react';
+import { Dropdown, Menu } from 'semantic-ui-react';
 
 class ContextMenu extends React.Component {
     state = {
@@ -55,8 +56,7 @@ class ContextMenu extends React.Component {
     _handleClick = (event) => {
         const { visible } = this.state;
         const wasOutside = !(event.target.contains === this.root);
-        
-        if (wasOutside && visible) this.setState({ visible: false, });
+        if (wasOutside && visible && !document.getElementsByClassName('visible link item').length ) this.setState({ visible: false, });
     };
 
     _handleScroll = () => {
@@ -64,19 +64,27 @@ class ContextMenu extends React.Component {
         
         if (visible) this.setState({ visible: false, });
     };
+
+    _handleTextAlign = (align) => {
+        for (let index = 0; index < this.state.selected.length; index++) {
+            this.state.selected[index].style.textAlign=align
+        }
+    }
     
     render() {
         const { visible, selected } = this.state;
         
         return(visible || null) && 
             <div ref={ref => {this.root = ref}} className="contextMenu">
-                <div className="contextMenu--option" onClick={()=>{
-                    for (let index = 0; index < selected.length; index++) {
-                        selected[index].style.textAlign="right"
-                    }
-                }}>Align right</div>
-                <div className="contextMenu--option">New window</div>
-                <div className="contextMenu--option">Visit official site</div>
+                <Dropdown text='Alignment' pointing='left' className='link item'>
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={()=>this._handleTextAlign('left')} style={{textAlign:'left'}} >Left</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>this._handleTextAlign('center')} style={{textAlign:'center'}} >Center</Dropdown.Item>
+                        <Dropdown.Item onClick={()=>this._handleTextAlign('right')} style={{textAlign:'right'}} >Right</Dropdown.Item>
+                        <div className="contextMenu--separator" />
+                        <Dropdown.Item>Help</Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
                 <div className="contextMenu--option contextMenu--option__disabled">View full version</div>
                 <div className="contextMenu--option">Settings</div>
                 <div className="contextMenu--separator" />

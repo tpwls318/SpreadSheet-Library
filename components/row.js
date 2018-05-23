@@ -4,14 +4,21 @@ import Columns from "./columns";
 
 class Row extends React.Component {
     render(){
-        const { data, nestedHeader, index, colWidths, headerLength, columnData } = this.props;
+        const { data, nestedHeader, index, colWidths, headerLength, columnData, cellState, selections } = this.props;
         return (
             <tr>
                 { headerLength && (!index && <td rowSpan={headerLength}></td>)}
                 {                     
                 nestedHeader ? 
                 <Header nestedHeader={nestedHeader} colWidths={colWidths}/> :
-                <Columns columnData={columnData} data={data} index={index} colWidths={colWidths}/> 
+                <Columns 
+                    columnData={columnData} 
+                    data={data} 
+                    index={index} 
+                    colWidths={colWidths} 
+                    cellState={cellState}
+                    selections={selections}
+                    /> 
                 }
             </tr>
         )

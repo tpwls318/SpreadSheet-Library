@@ -6,7 +6,7 @@ const DropdownMenu = () => (
     <Menu.Item>
       Home
     </Menu.Item>
-    <Dropdown text='Messages' pointing='left' className='link item'>
+    <Dropdown text='text align' pointing='left' className='text-align'>
       <Dropdown.Menu>
         <Dropdown.Item>Inbox</Dropdown.Item>
         <Dropdown.Item>Starred</Dropdown.Item>

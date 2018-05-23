@@ -8,12 +8,13 @@ import { connect } from 'react-redux';
 import ContextMenu from "./contextMenu";
 
 const mapStateToProps = (state) => {
-    const { data, nestedHeaders, colWidths, columns } = state;
+    const { data, nestedHeaders, colWidths, columns, cellState } = state;
     return {
         data,
         nestedHeaders,
         colWidths,
-        columns
+        columns,
+        cellState
     }
 }
 class Table extends React.Component {
@@ -49,7 +50,7 @@ class Table extends React.Component {
         let result=[];
         for (const key in obj) {
             if (obj.hasOwnProperty(key)) {
-                result.push(`${key}: ${obj[key]}`);
+                result.push(` ${key}: ${obj[key]}`);
             }
         }
         return result;
@@ -79,8 +80,14 @@ class Table extends React.Component {
             data,
             nestedHeaders,
             colWidths,
-            columns
+            columns,
+            cellState
         } = this.props;
+        const selections = cellState.reduce( (acc,e,rowI) => 
+             acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
+        ,[]).filter(e=>e.length);
+        console.log('selections : ',selections);
+        
         return (
             <div style={{overflowX: 'auto'}}>
                 <ContextMenu />
@@ -88,11 +95,19 @@ class Table extends React.Component {
                     <tbody >
                         {nestedHeaders.map(
                             (nestedHeader, index) => 
-                            <Row key={index} index={index} nestedHeader={nestedHeader} colWidths={colWidths} headerLength={nestedHeaders.length}/>
+                            <Row key={index} index={index} nestedHeader={nestedHeader} colWidths={colWidths} headerLength={nestedHeaders.length} />
                         )}
                         {data.map(
                             (dataInRow, index) => 
-                            <Row key={index} columnData={columns} data={dataInRow} index={index} colWidths={colWidths}/>
+                            <Row 
+                                key={index} 
+                                columnData={columns} 
+                                data={dataInRow} 
+                                index={index} 
+                                colWidths={colWidths} 
+                                cellState={cellState[index]}
+                                selections={selections} 
+                                />
                         )}
                         <tr>
                             <th>Sum</th>

@@ -13,7 +13,7 @@ import ContextMenu from "./contextMenu";
 class Columns extends React.Component {
 
     render() {
-        const { index, data, colWidths, saveState, saveData, dispatch, columnData } = this.props;
+        const { index, data, colWidths, saveState, saveData, dispatch, columnData, cellState, selections } = this.props;
         const rowIndex=index;
         return (
             <React.Fragment>
@@ -30,6 +30,8 @@ class Columns extends React.Component {
                             saveState={saveState}
                             dispatch={dispatch}
                             columnData={columnData[index]}
+                            cellState={cellState[index]}
+                            selections={selections}
                             />
                 )}
             </React.Fragment>
@@ -40,7 +42,7 @@ class TableData extends React.Component {
     constructor(props){
         super(props)
         this.state = {
-            isSelected: false,
+            isSelected: props.cellState.selected || false,
             colIndex: props.colIndex,
             rowIndex: props.rowIndex,
             isText: true,
@@ -48,9 +50,35 @@ class TableData extends React.Component {
             align: null
         }
     }
-    onClick = async () => {
-        await this.setState( prevState =>({isSelected: !prevState.isSelected}))
-        this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', this.state.isSelected)
+    onClick = async (e) => {
+        if( e.ctrlKey || e.metaKey ){
+            console.log(this.props.selections);
+            // await this.setState( prevState =>({isSelected: !prevState.isSelected}))
+            this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', !this.props.cellState.selected)
+            console.log(this.props.cellState, this.state.isSelected);
+        }
+        else if( e.shiftKey ){
+            this.props.selections.forEach((position,i) => {
+                if( this.props.selections.length>1 && i!==0) 
+                    this.props.saveState(position, 'selected', false)
+            }); 
+            for (let rowI = this.props.selections[0][0]; rowI <= this.state.rowIndex; rowI++) {
+                for (let colI = this.props.selections[0][1]; colI <= this.state.colIndex; colI++) {
+                    console.log('row, col :',rowI,colI);
+                    
+                    this.props.saveState([rowI,colI], 'selected', true)
+                }   
+            }
+            this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', !this.props.cellState.selected)
+            console.log(this.props.cellState, this.state.isSelected);
+        }
+        else {
+            console.log(this.props.selections);
+            this.props.selections.forEach(position => {
+                this.props.saveState(position, 'selected', false)
+            }); 
+            console.log(this.props.cellState, this.state.isSelected);
+        }         
     }
     onChange = (e, data, format) => {
         e.preventDefault();
@@ -81,10 +109,10 @@ class TableData extends React.Component {
         this.setState(prev=>({align:e}))
     }
     render() {
-        console.log('props in TableData!!!!',this.props);
+        // console.log('props in TableData!!!!',this.props);
         const { colWidths, datum, index, saveData, columnData } = this.props;
         let colClass = classNames({
-           'col-selected': this.state.isSelected
+           'col-selected': this.props.cellState.selected
         })
         switch (columnData.type) {
             case 'numeric':
@@ -94,10 +122,13 @@ class TableData extends React.Component {
                     type={ this.state.isText ? 'text' : 'number' }
                     // step='1' 
                     // min="1" 
-                    className={'numeric '+colClass}
-                    onClick={this.onClick}
-                    onFocus={()=>(this.setState(prevState=>({isText: false})))}
+                    // onFocus={()=>{(this.setState(prevState=>({isText: false})));this.onClick();}}
                     onBlur={()=>(this.setState(prevState=>({isText: true})))}
+                    className={'numeric '+colClass}
+                    onClick={()=>{
+                        this.setState(prevState=>({isText: false}));
+                        this.onClick();
+                    }}
                     onChange={(e, data)=>this.onChange(e, data, columnData.format)}
                     value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}
                     />
@@ -125,9 +156,9 @@ class TableData extends React.Component {
                     style={{textAlign: this.state.align}}
                     onContextMenu={(e)=>{e.preventDefault();this.setState(prevState=>({visible: !prevState.visible}))}}
                     onFocus={()=>this.setState(prevState=>({visible: !prevState.visible}))}
-                    type='string' 
-                    // step='1' 
-                    // min="1" 
+                    type='text'
+                    autoComplete='name' 
+                    name='name'
                     className={colClass}
                     onClick={this.onClick}
                     onChange={this.onChange}
