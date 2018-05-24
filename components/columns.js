@@ -6,14 +6,24 @@ import { bindActionCreators } from "redux";
 import actionCreators from "../redux/actions/action";
 import DropdownSelection from "./dropdown";
 import CustomCheckbox from "./checkbox";
-import DropdownMenu from "./dropdownMenu";
 import ContextMenu from "./contextMenu";
-
 
 class Columns extends React.Component {
 
     render() {
-        const { index, data, colWidths, saveState, saveData, dispatch, columnData, cellState, selections } = this.props;
+        const { 
+            index, 
+            data,
+            colWidths,
+            columnData,
+            cellState,
+            selections,
+            curCell,
+            dispatch,
+            saveState,
+            saveData,
+            changeCurCell,
+        } = this.props;
         const rowIndex=index;
         return (
             <React.Fragment>
@@ -26,12 +36,14 @@ class Columns extends React.Component {
                             colIndex={index} 
                             colWidths={colWidths[index]} 
                             datum={datum} 
-                            saveData={saveData}
-                            saveState={saveState}
-                            dispatch={dispatch}
                             columnData={columnData[index]}
                             cellState={cellState[index]}
                             selections={selections}
+                            curCell={curCell}
+                            dispatch={dispatch}
+                            saveData={saveData}
+                            saveState={saveState}
+                            changeCurCell={changeCurCell}
                             />
                 )}
             </React.Fragment>
@@ -51,33 +63,54 @@ class TableData extends React.Component {
         }
     }
     onClick = async (e) => {
-        if( e.ctrlKey || e.metaKey ){
-            console.log(this.props.selections);
-            // await this.setState( prevState =>({isSelected: !prevState.isSelected}))
-            this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', !this.props.cellState.selected)
-            console.log(this.props.cellState, this.state.isSelected);
-        }
-        else if( e.shiftKey ){
-            this.props.selections.forEach((position,i) => {
-                if( this.props.selections.length>1 && i!==0) 
-                    this.props.saveState(position, 'selected', false)
-            }); 
-            for (let rowI = this.props.selections[0][0]; rowI <= this.state.rowIndex; rowI++) {
-                for (let colI = this.props.selections[0][1]; colI <= this.state.colIndex; colI++) {
+        const shiftSelect = (cases) => {
+            let condition;
+            switch (cases) {
+                case 'LL':
+                    condition = [this.props.curCell[0],this.state.rowIndex,this.props.curCell[1],this.state.colIndex]
+                    break;                
+                case 'LS':
+                    condition = [this.props.curCell[0],this.state.rowIndex,this.state.colIndex,this.props.curCell[1]]
+                    break;
+                case 'SL':
+                    condition =  [this.state.rowIndex,this.props.curCell[0],this.props.curCell[1],this.state.colIndex]
+                    break;
+                case 'SS':
+                    condition =  [this.state.rowIndex,this.props.curCell[0],this.state.colIndex,this.props.curCell[1]]
+                    break;
+                default:
+                    break;
+            }
+            for (let rowI = condition[0]; rowI <= condition[1]; rowI++) {
+                for (let colI = condition[2]; colI <= condition[3]; colI++) {
                     console.log('row, col :',rowI,colI);
-                    
                     this.props.saveState([rowI,colI], 'selected', true)
                 }   
-            }
-            this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', !this.props.cellState.selected)
-            console.log(this.props.cellState, this.state.isSelected);
+            };
+            console.log('cases,condition!!!!!!:',cases,condition);
+            
         }
-        else {
-            console.log(this.props.selections);
-            this.props.selections.forEach(position => {
+        if( e.ctrlKey || e.metaKey ){
+            this.props.changeCurCell([this.state.rowIndex,this.state.colIndex]);
+            // await this.setState( prevState =>({isSelected: !prevState.isSelected}))
+            this.props.saveState([this.state.rowIndex,this.state.colIndex], 'selected', !this.props.cellState.selected)
+            console.log('selections,cellState,isSelected',this.props.selections,this.props.cellState, this.state.isSelected);
+        }
+        else if ( e.shiftKey ){
+            this.props.selections.forEach((position,i) => {
                 this.props.saveState(position, 'selected', false)
             }); 
-            console.log(this.props.cellState, this.state.isSelected);
+            this.props.curCell[0]<=this.state.rowIndex ? 
+            this.props.curCell[1]<=this.state.colIndex ? shiftSelect('LL'): shiftSelect('LS') :
+            this.props.curCell[1]<=this.state.colIndex ? shiftSelect('SL'): shiftSelect('SS')
+            console.log('cellState,isSelected',this.props.cellState, this.state.isSelected);
+        }
+        else {
+            this.props.changeCurCell([this.state.rowIndex,this.state.colIndex]);
+            this.props.selections.forEach(position => {
+                this.props.saveState(position, 'selected', false)
+            });
+            console.log('selections,curCell,cellState,isSelected',this.props.selections, this.props.curCell,this.props.cellState, this.state.isSelected);
         }         
     }
     onChange = (e, data, format) => {
@@ -110,14 +143,14 @@ class TableData extends React.Component {
     }
     render() {
         // console.log('props in TableData!!!!',this.props);
-        const { colWidths, datum, index, saveData, columnData } = this.props;
+        const { colWidths, datum, index, saveData, columnData, curCell} = this.props;
         let colClass = classNames({
-           'col-selected': this.props.cellState.selected
+           'col-selected': this.props.cellState.selected,
+           'recent-selected': !!curCell && [this.state.rowIndex,this.state.colIndex].map((x,i)=>x===curCell[i]).every(b=>b)
         })
         switch (columnData.type) {
-            case 'numeric':
-                console.log(this.formation(Number(datum), columnData.format));
-                return <Td colWidths={colWidths} draggable={true} >
+            case 'numeric':;
+                return <Td colWidths={colWidths} draggable={true} className={colClass}>
                     <input 
                     type={ this.state.isText ? 'text' : 'number' }
                     // step='1' 
@@ -125,9 +158,9 @@ class TableData extends React.Component {
                     // onFocus={()=>{(this.setState(prevState=>({isText: false})));this.onClick();}}
                     onBlur={()=>(this.setState(prevState=>({isText: true})))}
                     className={'numeric '+colClass}
-                    onClick={()=>{
+                    onClick={(e)=>{
                         this.setState(prevState=>({isText: false}));
-                        this.onClick();
+                        this.onClick(e);
                     }}
                     onChange={(e, data)=>this.onChange(e, data, columnData.format)}
                     value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}
@@ -150,7 +183,7 @@ class TableData extends React.Component {
                     </Td>
                 break;
             default:
-                return <Td colWidths={colWidths} draggable={true} >
+                return <Td colWidths={colWidths} draggable={true} className={colClass}>
                     <input 
                     ref={ref => {this.col = ref}}
                     style={{textAlign: this.state.align}}
@@ -176,6 +209,6 @@ const mapDispatchToProps = dispatch =>
     ({
         saveState: bindActionCreators(actionCreators.saveState, dispatch),
         saveData: bindActionCreators(actionCreators.saveData, dispatch),
+        changeCurCell: bindActionCreators(actionCreators.changeCurCell, dispatch),
     })
 export default connect(null, mapDispatchToProps)(Columns);
-// export default Columns;

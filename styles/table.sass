@@ -1,10 +1,6 @@
 $font-stack: Helvetica, sans-serif
 $primary-color: #9f2
 
-// body
-//   margin-top: 100px
-//   font: 100% $font-stack
-//   color: $primary-color
 h1
   color: $primary-color !important
 
@@ -28,19 +24,22 @@ td
   line-height: 3rem
   font-size: 1rem
   width : 100px 
+  .recent-selected
+    border: 3px solid blue
+  .col-selected
+    background-color: rgba(30, 144, 255, 0.2) 
+    border: 1px solid blue
+  .col-selected.recent-selected
+    background-color: rgba(30, 144, 255, 0.2)
+    border: 3px solid blue
   input 
     margin: 0
     width: 100%
     height: 3rem
-
+   
 .checkbox-arr
   line-height: 1.666rem  
     
-
-.col-selected
-  background-color: rgba(30, 144, 255, 0.4) 
-  border: 1px solid blue
-
 .dropdown
   width: 90%
   margin: 3% 5%

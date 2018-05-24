@@ -8,13 +8,14 @@ import { connect } from 'react-redux';
 import ContextMenu from "./contextMenu";
 
 const mapStateToProps = (state) => {
-    const { data, nestedHeaders, colWidths, columns, cellState } = state;
+    const { data, nestedHeaders, colWidths, columns, cellState, curCell } = state;
     return {
         data,
         nestedHeaders,
         colWidths,
         columns,
-        cellState
+        cellState,
+        curCell
     }
 }
 class Table extends React.Component {
@@ -39,8 +40,7 @@ class Table extends React.Component {
             for (const key in item) {
                 if( typeof key === 'string' )
                     obj[key] = obj[key] ? obj[key]+1 : 1;
-            }
-            console.log('objobjobjojb',obj);    
+            }   
         }
         else obj[item] = obj[item] ? obj[item]+1 : 1
         return obj;
@@ -69,8 +69,6 @@ class Table extends React.Component {
             (Number(i)+1)%5===0 ?
             str+=`${arr[i]},&` : str+=`${arr[i]}, `
         }
-        console.log(str.split('&'));
-        
         return str.split('&');
     }
 
@@ -81,12 +79,12 @@ class Table extends React.Component {
             nestedHeaders,
             colWidths,
             columns,
-            cellState
+            cellState,
+            curCell
         } = this.props;
         const selections = cellState.reduce( (acc,e,rowI) => 
              acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
         ,[]).filter(e=>e.length);
-        console.log('selections : ',selections);
         
         return (
             <div style={{overflowX: 'auto'}}>
@@ -95,7 +93,17 @@ class Table extends React.Component {
                     <tbody >
                         {nestedHeaders.map(
                             (nestedHeader, index) => 
-                            <Row key={index} index={index} nestedHeader={nestedHeader} colWidths={colWidths} headerLength={nestedHeaders.length} />
+                            <Row 
+                                key={index} 
+                                index={index} 
+                                nestedHeader={nestedHeader} 
+                                colWidths={colWidths} 
+                                headerLength={nestedHeaders.length} 
+                                rowLength={data.length}
+                                cellState={cellState}
+                                selections={selections}
+                                curCell={curCell}
+                                />
                         )}
                         {data.map(
                             (dataInRow, index) => 
@@ -107,6 +115,8 @@ class Table extends React.Component {
                                 colWidths={colWidths} 
                                 cellState={cellState[index]}
                                 selections={selections} 
+                                
+                                curCell={curCell}
                                 />
                         )}
                         <tr>
@@ -119,7 +129,7 @@ class Table extends React.Component {
                                 <td key={index} >{this.formation(data.reduce( (acc,e)=>( acc+parseInt(`${e[index]}`.split(',').join(''))), 0),columns[index].format )}</td> :
                                 columns[index].type==='checkbox' ? 
                                 <td key={index} className='checkbox-arr'>{ this.groupingInToFive(data.reduce( (acc,e)=> this.binarify(acc, e[index]), []))
-                                .map(e=><div>{e.toString()}</div>)  }</td> :
+                                .map((e,i)=><div key={i}>{e.toString()}</div>)  }</td> :
                                 <td key={index} >{data.reduce( (acc,e)=>( acc+parseInt(e[index]) ), 0) }</td>
                             )}
                             

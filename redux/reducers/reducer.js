@@ -34,6 +34,7 @@ const initialState= {
         },
         {}
     ],
+    curCell: null,
     cellState: Array.from({ length: 20 }, (e,i) => new Array(5).fill({}) ),
     cells: (col, row) => { //각 셀의 행과 열을 받아 접근할 수 있습니다.
     //col, row로 필드에 접근할 수 있습니다.
@@ -53,13 +54,13 @@ const initialState= {
     fixedColumnsLeft: 1, //열 하나를 고정(헤더 제외, 헤더는 항상 고정)
 }
 function reducer(state = initialState, action){
-    console.log(state);
-    
     switch(action.type){
         case 'SAVE_DATA':
             return applySaveData(state, action.position, action.value);
         case 'SAVE_STATE':
             return applySaveState(state, action.position, action.key, action.value)
+        case 'CHANGE_CUR_CELL':
+            return applyChangeCurCell(state, action.position)
         default:
             return state;  
     }
@@ -86,7 +87,11 @@ const applySaveState = (state, position, key, value) =>
             ) : eRow
         ))
     })
-
+const applyChangeCurCell = (state, position) =>
+    ({
+        ...state,
+        curCell: position,
+    })
 // X Reducer
 
 export default reducer;

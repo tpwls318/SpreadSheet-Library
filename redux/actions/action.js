@@ -2,6 +2,7 @@
 
 const SAVE_DATA = 'SAVE_DATA';
 const SAVE_STATE = 'SAVE_STATE';
+const CHANGE_CUR_CELL = 'CHANGE_CUR_CELL';
 
 //Action Creators
 
@@ -16,12 +17,17 @@ const saveState = (position, key, value) => ({
     key,
     value
 })
+const changeCurCell = (position) => ({
+    type: CHANGE_CUR_CELL,
+    position,
+})
 
 // X Action Creators
 
 const actionCreators = {
     saveData,
     saveState,
+    changeCurCell,
 }
 
 export default actionCreators;

@@ -9,7 +9,6 @@ import { Dropdown } from 'semantic-ui-react'
 // ]
 
 const DropdownSelection = ({onChange, datum, columnData}) => {
-  console.log(columnData.selectOptions);
   const options = columnData.selectOptions.map(e=>({key: e, text: e, value: e }));
   return (
     <Dropdown 
