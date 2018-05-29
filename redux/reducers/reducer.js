@@ -9,6 +9,7 @@ const getData = (rows, cols) => {
 // settings
 const initialState= {
     data: getData(20, 5), //데이터를 연결
+    selectionStarted: false,
     nestedHeaders: [ //헤더부분
         ['A', {label: 'B', colspan: 3}, 'C'],
         ['D', {label: 'E', colspan: 2}, 'F', 'G'],
@@ -36,6 +37,8 @@ const initialState= {
     ],
     curCell: null,
     cellState: Array.from({ length: 20 }, (e,i) => new Array(5).fill({}) ),
+    colHeaderState: new Array(5).fill({}),
+    rowHeaderState: new Array(20).fill({selected: false}),
     cells: (col, row) => { //각 셀의 행과 열을 받아 접근할 수 있습니다.
     //col, row로 필드에 접근할 수 있습니다.
     },
@@ -61,6 +64,10 @@ function reducer(state = initialState, action){
             return applySaveState(state, action.position, action.key, action.value)
         case 'CHANGE_CUR_CELL':
             return applyChangeCurCell(state, action.position)
+        case 'TOGGLE_SEL_STARTED':
+            return applyToggleSelectionStarted(state, action.isStarted)
+        case 'SET_RH_STATE':
+            return applySetRowHeaderState(state, action.rows, action.key, action.value)
         default:
             return state;  
     }
@@ -92,6 +99,33 @@ const applyChangeCurCell = (state, position) =>
         ...state,
         curCell: position,
     })
+const applyToggleSelectionStarted = (state, isStarted) => 
+    ({
+        ...state,
+        selectionStarted: isStarted
+    })
+const applySetRowHeaderState = (state, rows, key, value) => 
+    (
+        !key?
+        {
+            ...state,
+            rowHeaderState: state.rowHeaderState.map((e,i)=>({...e, selected: rows.includes(i)})),
+            cellState: state.cellState.map((eRow,i)=>
+                rows.includes(i)?
+                eRow.map(eCol=>({...eCol, selected: true}) ) :
+                eRow 
+            )
+        }:
+        {
+            ...state,
+            rowHeaderState: state.rowHeaderState.map((e,i)=>(rows.includes(i)?{...e, [key]: value}:e)),
+            cellState: state.cellState.map((eRow,i)=>
+                rows.includes(i)?
+                eRow.map(eCol=>({...eCol, [key]: value}) ) :
+                eRow 
+            )
+            }
+)
 // X Reducer
 
 export default reducer;

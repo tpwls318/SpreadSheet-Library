@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { connect } from 'react-redux';
 import { bindActionCreators } from "redux";
 import actionCreators from "../redux/actions/action";
-let i;
+let i, acc;
 class Header extends React.Component {
     sum = (arr,n) => {
         let result = arr.slice(i,i+n).reduce((acc,e)=>acc+e);
@@ -11,11 +11,22 @@ class Header extends React.Component {
         console.log(`result,i,n :${result}, ${i}, ${n}`);
         return result;
     }
-    selectColumn = (e, index) => {
+    headerIndex = (nestedHeader) => {
+        let result={}, n=0;
+        nestedHeader.forEach((e,i)=>{
+            result[i] = e.colspan ? n+=e.colspan-1 :n 
+            n++; 
+        })
+        return result;
+    }
+    selectColumn = (e, i, colSpan) => {
+        acc=0;
+        for (let index=colSpan?i-colSpan+1:i; index<i+1; index++ )
+        {
             if( e.ctrlKey || e.metaKey ){
-                this.props.changeCurCell([`h${this.props.index}`,index]);
-                Array.from({length: this.props.rowLength},(e,i)=>[i,index]).forEach( position =>
-                    this.props.saveState(position, 'selected', !this.props.cellState[position[0]][position[1]].selected) )
+            this.props.changeCurCell([`h${this.props.index}`,index]);
+            Array.from({length: this.props.rowLength},(e,i)=>[i,index]).forEach( position =>
+                this.props.saveState(position, 'selected', !this.props.cellState[position[0]][position[1]].selected) )
             }
             else if ( e.shiftKey ){
                 this.props.selections.forEach((position,i) => {
@@ -39,6 +50,7 @@ class Header extends React.Component {
                     this.props.saveState(position, 'selected', !this.props.cellState[position[0]][position[1]].selected) )
                 console.log('selections,curCell,cellState',this.props.selections, this.props.curCell,this.props.cellState);
             }         
+        }
     }
         
     render() {
@@ -55,13 +67,14 @@ class Header extends React.Component {
                             scope="colgroup" 
                             colWidths={this.sum(colWidths,h.colspan)} 
                             colSpan={h.colspan} 
+                            onClick={e=>this.selectColumn(e,this.headerIndex(nestedHeader)[index], h.colspan)}
                             key={index} 
                             >{h.label}</Th> : 
                         <Th 
                             className="columnHeaders" 
                             scope="col" 
                             colWidths={colWidths[i++]}
-                            onClick={e=>this.selectColumn(e,index)} 
+                            onClick={e=>this.selectColumn(e,this.headerIndex(nestedHeader)[index])} 
                             key={index} 
                             >{h}</Th>
                 )}  

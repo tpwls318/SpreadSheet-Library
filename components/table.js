@@ -6,19 +6,20 @@ import Row from "./row";
 import "../styles/table";
 import { connect } from 'react-redux';
 import ContextMenu from "./contextMenu";
+import { bindActionCreators } from "redux";
+import actionCreators from "../redux/actions/action";
 
-const mapStateToProps = (state) => {
-    const { data, nestedHeaders, colWidths, columns, cellState, curCell } = state;
-    return {
-        data,
-        nestedHeaders,
-        colWidths,
-        columns,
-        cellState,
-        curCell
-    }
-}
 class Table extends React.Component {
+    componentDidMount = () => {
+        window.addEventListener("mouseup", this.handleEnd);
+        window.addEventListener("touchend", this.handleEnd);
+      };
+    
+    componentWillUnmount = () => {
+    window.removeEventListener("mouseup", this.handleEnd);
+    window.removeEventListener("touchend", this.handleEnd);
+    };
+    handleEnd = () => this.props.toggleSelectionStarted(false)
     formation = (number, format) => {
         let f=format.split(',').pop().length
         let formattedNumber='';
@@ -115,7 +116,7 @@ class Table extends React.Component {
                                 colWidths={colWidths} 
                                 cellState={cellState[index]}
                                 selections={selections} 
-                                
+                                headerLength={nestedHeaders.length} 
                                 curCell={curCell}
                                 />
                         )}
@@ -144,6 +145,24 @@ class Table extends React.Component {
 Table.propTypes={
     // Header: PropTypes.Component.isRequired
 }
-
-export default connect(mapStateToProps)(Table);
+const mapStateToProps = state => {
+    const { data, nestedHeaders, colWidths, columns, cellState, curCell, selectionStarted } = state;
+    return {
+        data,
+        nestedHeaders,
+        colWidths,
+        columns,
+        cellState,
+        curCell,
+        selectionStarted,
+    }
+}
+const mapDispatchToProps = dispatch =>
+    ({
+        saveState: bindActionCreators(actionCreators.saveState, dispatch),
+        saveData: bindActionCreators(actionCreators.saveData, dispatch),
+        changeCurCell: bindActionCreators(actionCreators.changeCurCell, dispatch),
+        toggleSelectionStarted: bindActionCreators(actionCreators.toggleSelectionStarted, dispatch),
+    })
+export default connect(mapStateToProps, mapDispatchToProps)(Table);
 

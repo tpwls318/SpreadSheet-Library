@@ -7,37 +7,26 @@ class Row extends React.Component {
         const { 
                 data, 
                 nestedHeader, 
-                index, 
-                colWidths, 
                 headerLength, 
                 rowLength, 
                 columnData, 
-                cellState, 
-                selections, 
-                curCell 
+                ...rest
             } = this.props;
         return (
             <tr>
-                { headerLength && (!index && <td rowSpan={headerLength}></td>)}
+                { nestedHeader && (!this.props.index && <td rowSpan={headerLength}></td>)}
                 {                     
                 nestedHeader ? 
                 <Header 
                     nestedHeader={nestedHeader} 
-                    colWidths={colWidths} 
                     rowLength={rowLength}
-                    cellState={cellState}
-                    selections={selections}
-                    curCell={curCell}
-                    index={index}
+                    {...rest}
                     /> :
                 <Columns 
                     columnData={columnData} 
                     data={data} 
-                    index={index} 
-                    colWidths={colWidths} 
-                    cellState={cellState}
-                    selections={selections}
-                    curCell={curCell}
+                    headerLength={headerLength}
+                    {...rest}
                     /> 
                 }
             </tr>

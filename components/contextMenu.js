@@ -4,7 +4,8 @@ import { Dropdown, Menu } from 'semantic-ui-react';
 class ContextMenu extends React.Component {
     state = {
         visible: false,
-        selected: document.getElementsByClassName("col-selected")
+        selected: document.getElementsByClassName("col-selected"),
+        cur_selected: document.getElementsByClassName("recent-selected")
     };
     
     componentDidMount() {
@@ -69,10 +70,13 @@ class ContextMenu extends React.Component {
         for (let index = 0; index < this.state.selected.length; index++) {
             this.state.selected[index].style.textAlign=align
         }
+        for (let index = 0; index < this.state.cur_selected.length; index++) {
+            this.state.cur_selected[index].style.textAlign=align
+        }
     }
     
     render() {
-        const { visible, selected } = this.state;
+        const { visible } = this.state;
         
         return(visible || null) && 
             <div ref={ref => {this.root = ref}} className="contextMenu">
