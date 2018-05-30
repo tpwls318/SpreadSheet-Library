@@ -17,6 +17,7 @@ class Columns extends React.Component {
             columnData,
             cellState,
             rowHeaderState,
+            colHeaderState,
             ...rest
         } = this.props;
         const rowIndex=index;
@@ -38,6 +39,7 @@ class Columns extends React.Component {
                             datum={datum} 
                             columnData={columnData[index]}
                             cellState={cellState[index]}
+                            colHeaderState={colHeaderState}
                             {...rest}
                             />
                 )}
@@ -47,10 +49,11 @@ class Columns extends React.Component {
 }
 
 const mapStateToProps = state => {
-    const { selectionStarted, rowHeaderState } = state;
+    const { selectionStarted, rowHeaderState, colHeaderState } = state;
     return {
         selectionStarted,
         rowHeaderState,
+        colHeaderState
     }
 }
 const mapDispatchToProps = dispatch =>
@@ -59,6 +62,6 @@ const mapDispatchToProps = dispatch =>
         saveData: bindActionCreators(actionCreators.saveData, dispatch),
         changeCurCell: bindActionCreators(actionCreators.changeCurCell, dispatch),
         toggleSelectionStarted: bindActionCreators(actionCreators.toggleSelectionStarted, dispatch),
-        setRowHeaderState: bindActionCreators(actionCreators.setRowHeaderState, dispatch)
+        setRowHeaderState: bindActionCreators(actionCreators.setRowHeaderState, dispatch),
     })
 export default connect(mapStateToProps, mapDispatchToProps)(Columns);

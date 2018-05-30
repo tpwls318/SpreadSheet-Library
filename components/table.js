@@ -81,7 +81,7 @@ class Table extends React.Component {
             colWidths,
             columns,
             cellState,
-            curCell
+            curCell,
         } = this.props;
         const selections = cellState.reduce( (acc,e,rowI) => 
              acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )

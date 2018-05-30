@@ -41,7 +41,7 @@ class TableData extends React.Component {
             }   
         }
     }
-    onClick = async (e) => {
+    onClick = e => {
         e.preventDefault();
         const { row, col }=this.eventToCellLocation(e);
         // console.log('row, col, this.props.curCell: ',row, col, this.props.curCell);
@@ -152,14 +152,14 @@ class TableData extends React.Component {
       };
     render() {
         // console.log('props in TableData!!!!',this.props);
-        const { colWidths, datum, index, saveData, columnData, curCell} = this.props;
+        const { colWidths, datum, index, saveData, columnData, curCell, colHeaderState, cellState} = this.props;
         let colClass = classNames({
-           'col-selected': this.props.cellState.selected,
+           'col-selected': cellState.selected,
            'recent-selected': !!curCell && [this.state.rowIndex,this.state.colIndex].map((x,i)=>x===curCell[i]).every(b=>b)
         })
         switch (columnData.type) {
             case 'numeric':;
-                return <Td colWidths={colWidths} className={colClass}>
+                return <Td colWidths={colWidths} className={colClass} hidden={cellState.hidden}>
                     <input 
                     type={ this.state.isText ? 'text' : 'number' }
                     // step='1' 
@@ -176,7 +176,7 @@ class TableData extends React.Component {
                     onTouchMove={this.onClick}
                     onMouseMove={this.onMouseMove}
                     onChange={(e, data)=>this.onChange(e, data, columnData.format)}
-                    value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}
+                    value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}                    
                     />
                 </Td>
                 break;
@@ -189,6 +189,7 @@ class TableData extends React.Component {
                             onMouseDown={this.onClick}
                             onTouchMove={this.onClick}
                             onMouseMove={this.onMouseMove}
+                            hidden={cellState.hidden}
                             >
                           <CustomCheckbox 
                             saveData={saveData} 
@@ -207,6 +208,7 @@ class TableData extends React.Component {
                             onMouseDown={this.onClick}
                             onTouchMove={this.onClick}
                             onMouseMove={this.onMouseMove}
+                            hidden={cellState.hidden}
                             >
                         <DropdownSelection onChange={this.onChange} datum={datum} columnData={columnData} />
                     </Td>
@@ -227,6 +229,7 @@ class TableData extends React.Component {
                     onTouchMove={this.onClick}
                     onMouseMove={this.onMouseMove}
                     defaultValue={datum}
+                    hidden={cellState.hidden}
                     />
                 </Td>
             break;

@@ -37,7 +37,7 @@ const initialState= {
     ],
     curCell: null,
     cellState: Array.from({ length: 20 }, (e,i) => new Array(5).fill({}) ),
-    colHeaderState: new Array(5).fill({}),
+    colHeaderState: Array.from({ length: 3 }, (e,i) => new Array(5).fill({}) ),
     rowHeaderState: new Array(20).fill({selected: false}),
     cells: (col, row) => { //각 셀의 행과 열을 받아 접근할 수 있습니다.
     //col, row로 필드에 접근할 수 있습니다.
@@ -68,6 +68,8 @@ function reducer(state = initialState, action){
             return applyToggleSelectionStarted(state, action.isStarted)
         case 'SET_RH_STATE':
             return applySetRowHeaderState(state, action.rows, action.key, action.value)
+        case 'SET_CH_STATE':
+            return applySetColHeaderState(state, action.cols, action.key, action.value)
         default:
             return state;  
     }
@@ -123,6 +125,24 @@ const applySetRowHeaderState = (state, rows, key, value) =>
                 rows.includes(i)?
                 eRow.map(eCol=>({...eCol, [key]: value}) ) :
                 eRow 
+            )
+            }
+)
+const applySetColHeaderState = (state, cols, key, value) => 
+    (
+        key!=='selected'?
+        {
+            ...state,
+            colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
+            cellState: state.cellState.map((eRow)=>
+                eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol ) 
+            )
+        }:
+        {
+            ...state,
+            colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
+            cellState: state.cellState.map((eRow)=>
+                eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
             )
             }
 )
