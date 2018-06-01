@@ -104,7 +104,7 @@ class Table extends React.Component {
                                 cellState={cellState}
                                 selections={selections}
                                 curCell={curCell}
-                                />
+                            />
                         )}
                         {data.map(
                             (dataInRow, index) => 
@@ -118,7 +118,7 @@ class Table extends React.Component {
                                 selections={selections} 
                                 headerLength={nestedHeaders.length} 
                                 curCell={curCell}
-                                />
+                            />
                         )}
                         <tr>
                             <th>Sum</th>

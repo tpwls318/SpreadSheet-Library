@@ -41,7 +41,7 @@ class Columns extends React.Component {
                             cellState={cellState[index]}
                             colHeaderState={colHeaderState}
                             {...rest}
-                            />
+                        />
                 )}
             </React.Fragment>
         )
@@ -49,11 +49,13 @@ class Columns extends React.Component {
 }
 
 const mapStateToProps = state => {
-    const { selectionStarted, rowHeaderState, colHeaderState } = state;
+    const { selectionStarted, rowHeaderState, colHeaderState, beforeChange, afterChange  } = state;
     return {
         selectionStarted,
         rowHeaderState,
-        colHeaderState
+        colHeaderState,
+        beforeChange,
+        afterChange
     }
 }
 const mapDispatchToProps = dispatch =>

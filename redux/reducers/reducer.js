@@ -44,14 +44,34 @@ const initialState= {
     },
     collapsibleColumns: [ //토글 열(접었다 폈다)을 생성
         {row: -2, col: 1, collapsible: true},
-        {row: -2, col: 1, collapsible: true}
-        ],
-    beforeChange: (changes) => { //값을 저장하기 전에 콜되는 함수
+        {row: -2, col: 1, collapsible: true},
+    ],
+    beforeChange: (row, col, prevVal, curVal) => {
+        //값을 저장하기 전에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
-        },
-    afterChange: (changes) => { //값이 저장한 후에 콜되는 함수
+        console.log('beforeChange: ');
+        let nextVal={};
+        nextVal['value'] = `${Math.round(Number(curVal)/10)*10}`;
+        console.log(`
+            row: ${row}, 
+            col: ${col}, 
+            prevVal: ${prevVal}, 
+            curVal: ${curVal}, 
+            nextVal: ${nextVal.value}
+            `);
+        return nextVal;
+        // return !isNaN(Number(curVal))
+    },
+    afterChange: (row, col, prevVal, curVal) => { //값이 저장한 후에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
-        },
+        console.log('afterChange');
+    },
+    beforeHeaderCollapsed: (changes) => { //값을 저장하기 전에 콜되는 함수
+        //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
+    },
+    afterHeaderCollapsed: (changes) => { //값이 저장한 후에 콜되는 함수
+        //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
+    },
     editor: 'text', //false면 수정이 불가능합니다.
     fixedRowsTop: 1, //행 하나를 고정(헤더 제외, 헤더는 항상 고정)
     fixedColumnsLeft: 1, //열 하나를 고정(헤더 제외, 헤더는 항상 고정)

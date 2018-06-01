@@ -42,7 +42,7 @@ class TableData extends React.Component {
         }
     }
     onClick = e => {
-        e.preventDefault();
+        // e.preventDefault();
         const { row, col }=this.eventToCellLocation(e);
         // console.log('row, col, this.props.curCell: ',row, col, this.props.curCell);
         // console.log('e.type,this.props.selectionStarted: ',e.type,this.props.selectionStarted);
@@ -98,15 +98,29 @@ class TableData extends React.Component {
         this.props.changeCurCell([row,col]);
         console.log('row, col: ',row, col);
     }
+    deformation = (format, ...values) => {
+        console.log('values:', values);
+        
+        return format ? values.map(value=> `${value}`.split(',').join('')) : values;
+    }
+    onChangeCycle = (format, row, col, ...values) => {
+        let applychange = this.props.beforeChange(row, col, ...this.deformation(format, ...values))
+        if( applychange )
+        {
+            this.props.saveData([row, col], applychange.value ? applychange.value: values[1]);
+            this.props.afterChange(row, col,...this.deformation(format, ...values));
+        }
+
+    }
     onChange = (e, data, format) => {
+        let curVal, nextVal;
         e.preventDefault();
-        data ? 
-        this.props.saveData([this.state.rowIndex,this.state.colIndex], data.value ):
-        format ? this.props.saveData([this.state.rowIndex,this.state.colIndex], this.formation(Number(e.target.value), format) ):
-        this.props.saveData([this.state.rowIndex,this.state.colIndex], e.target.value);
-        // console.log(`${this.state.rowIndex},${this.state.colIndex}: ${e.target}`)
-        // console.log(data.value);  
-        return data ? data.value : format ? this.formation(Number(e.target.value), format) : e.target.value;
+        curVal = 
+            data? data.value: 
+                format ? this.formation(Number(e.target.value), format):
+                e.target.value
+        return this.onChangeCycle(format, this.state.rowIndex, this.state.colIndex, this.props.datum, curVal, nextVal=null)
+
     };
     formation = (number, format) => {
         let f=format.split(',').pop().length
@@ -133,9 +147,6 @@ class TableData extends React.Component {
       };
     eventToCellLocation = e => {
         let target;
-        // For touchmove and touchend events, e.target and e.touches[n].target are
-        // wrong, so we have to rely on elementFromPoint(). For mouse clicks, we have
-        // to use e.target.
         if (e.touches) {
           const touch = e.touches[0];
           target = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -161,22 +172,20 @@ class TableData extends React.Component {
             case 'numeric':;
                 return <Td colWidths={colWidths} className={colClass} hidden={cellState.hidden}>
                     <input 
-                    type={ this.state.isText ? 'text' : 'number' }
-                    // step='1' 
-                    // min="1" 
-                    // onFocus={()=>{(this.setState(prevState=>({isText: false})));this.onClick();}}
-                    onBlur={()=>(this.setState(prevState=>({isText: true})))}
-                    className={'numeric '+colClass}
-                    onClick={(e)=>{
-                        this.setState(prevState=>({isText: false}));
-                        this.onClick(e);
-                    }}
-                    onTouchStart={this.onClick}
-                    onMouseDown={this.onClick}
-                    onTouchMove={this.onClick}
-                    onMouseMove={this.onMouseMove}
-                    onChange={(e, data)=>this.onChange(e, data, columnData.format)}
-                    value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}                    
+                        type={ this.state.isText ? 'text' : 'number' }
+                        // onFocus={()=>{(this.setState(prevState=>({isText: false})));this.onClick();}}
+                        onBlur={()=>(this.setState(prevState=>({isText: true})))}
+                        className={'numeric '+colClass}
+                        onClick={(e)=>{
+                            this.setState(prevState=>({isText: false}));
+                            this.onClick(e);
+                        }}
+                        onTouchStart={this.onClick}
+                        onMouseDown={this.onClick}
+                        onTouchMove={this.onClick}
+                        onMouseMove={this.onMouseMove}
+                        onChange={(e, data)=>this.onChange(e, data, columnData.format)}
+                        value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}                    
                     />
                 </Td>
                 break;
@@ -190,7 +199,7 @@ class TableData extends React.Component {
                             onTouchMove={this.onClick}
                             onMouseMove={this.onMouseMove}
                             hidden={cellState.hidden}
-                            >
+                        >
                           <CustomCheckbox 
                             saveData={saveData} 
                             position={[this.state.rowIndex,this.state.colIndex]}
@@ -209,27 +218,27 @@ class TableData extends React.Component {
                             onTouchMove={this.onClick}
                             onMouseMove={this.onMouseMove}
                             hidden={cellState.hidden}
-                            >
+                        >
                         <DropdownSelection onChange={this.onChange} datum={datum} columnData={columnData} />
                     </Td>
                 break;
             default:
                 return <Td colWidths={colWidths} className={colClass}>
                     <input 
-                    style={{textAlign: this.state.align}}
-                    onFocus={()=>this.setState(prevState=>({visible: !prevState.visible}))}
-                    type='text'
-                    autoComplete='name' 
-                    name='name'
-                    className={colClass}
-                    onClick={this.onClick}
-                    onChange={this.onChange}
-                    onTouchStart={this.onClick}
-                    onMouseDown={this.onClick}
-                    onTouchMove={this.onClick}
-                    onMouseMove={this.onMouseMove}
-                    defaultValue={datum}
-                    hidden={cellState.hidden}
+                        style={{textAlign: this.state.align}}
+                        onFocus={()=>this.setState(prevState=>({visible: !prevState.visible}))}
+                        type='text'
+                        autoComplete='name' 
+                        name='name'
+                        className={colClass}
+                        onClick={this.onClick}
+                        onChange={this.onChange}
+                        onTouchStart={this.onClick}
+                        onMouseDown={this.onClick}
+                        onTouchMove={this.onClick}
+                        onMouseMove={this.onMouseMove}
+                        value={datum}
+                        hidden={cellState.hidden}
                     />
                 </Td>
             break;
