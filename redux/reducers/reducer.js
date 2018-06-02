@@ -46,18 +46,30 @@ const initialState= {
         {row: -2, col: 1, collapsible: true},
         {row: -2, col: 1, collapsible: true},
     ],
-    beforeChange: (row, col, prevVal, curVal) => {
+    beforeChange: (type, row, col, prevVal, curVal) => {
         //값을 저장하기 전에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
+        const removeChar = (str) => {
+			let result='';
+            for (let e of str) {
+                if( !isNaN(Number(e)) )
+                   result+=e;
+            }
+            return result;
+        }
         console.log('beforeChange: ');
         let nextVal={};
-        nextVal['value'] = `${Math.round(Number(curVal)/10)*10}`;
+        nextVal['value'] =
+        type === 'numeric' ? `${Math.round(Number(curVal)/10)*10}`:
+        type === undefined ? removeChar(curVal):  
+        curVal
         console.log(`
             row: ${row}, 
             col: ${col}, 
             prevVal: ${prevVal}, 
             curVal: ${curVal}, 
-            nextVal: ${nextVal.value}
+            nextVal: ${nextVal.value},
+            type: ${type}
             `);
         return nextVal;
         // return !isNaN(Number(curVal))

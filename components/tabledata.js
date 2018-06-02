@@ -65,14 +65,14 @@ class TableData extends React.Component {
             this.props.curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
             // console.log('cellState',this.props.cellState);
         }
-        else if( e.type === 'click' || e.type === 'mousedown' || e.type === 'touchstart'){
+        else if( e.type === 'click' || (e.type === 'mousedown'&&!e.button) || e.type === 'touchstart'){
             if( e.type !== 'click' )
                 this.props.toggleSelectionStarted(true)
             this.props.changeCurCell([row,col]);
             this.props.selections.forEach(position => {
                 this.props.saveState(position, 'selected', false)
             });
-            console.log('selections,curCell,cellState',this.props.selections, this.props.curCell,this.props.cellState);
+            console.log('selections,curCell,cellState',this.props.selections, this.props.curCell,this.props.cellState,e.button);
         }         
     }
     onMouseMove = e => {
@@ -103,23 +103,42 @@ class TableData extends React.Component {
         
         return format ? values.map(value=> `${value}`.split(',').join('')) : values;
     }
-    onChangeCycle = (format, row, col, ...values) => {
-        let applychange = this.props.beforeChange(row, col, ...this.deformation(format, ...values))
+    onChangeCycle = (type, format, row, col, ...values) => {
+        let applychange = this.props.beforeChange(type, row, col, ...this.deformation(format, ...values))
         if( applychange )
         {
-            this.props.saveData([row, col], applychange.value ? applychange.value: values[1]);
-            this.props.afterChange(row, col,...this.deformation(format, ...values));
+            this.props.saveData([row, col], 
+                applychange.value ? 
+                    format ? this.formation(Number(applychange.value), format)
+                            :applychange.value: values[1]);
+            this.props.afterChange(type, row, col,...this.deformation(format, ...values));
         }
-
     }
-    onChange = (e, data, format) => {
+    onChange = (e, data, format, type) => {
         let curVal, nextVal;
         e.preventDefault();
-        curVal = 
-            data? data.value: 
-                format ? this.formation(Number(e.target.value), format):
-                e.target.value
-        return this.onChangeCycle(format, this.state.rowIndex, this.state.colIndex, this.props.datum, curVal, nextVal=null)
+        // saveData(position, {[data.label]:data.checked});
+        switch (type) {
+            case 'numeric':
+                curVal = format ? 
+                this.formation(Number(e.target.value), format):
+                e.target.value;
+                break;
+            case 'checkbox':
+                curVal = data;
+                break;
+            case 'dropdown':
+                curVal = data.value;
+                break;
+            default:
+                curVal = e.target.value;
+                break;
+        }
+        // curVal = 
+        //     data? data.value: 
+        //         format ? this.formation(Number(e.target.value), format):
+        //         e.target.value
+        return this.onChangeCycle(type, format, this.state.rowIndex, this.state.colIndex, this.props.datum, curVal, nextVal=null)
 
     };
     formation = (number, format) => {
@@ -169,7 +188,7 @@ class TableData extends React.Component {
            'recent-selected': !!curCell && [this.state.rowIndex,this.state.colIndex].map((x,i)=>x===curCell[i]).every(b=>b)
         })
         switch (columnData.type) {
-            case 'numeric':;
+            case 'numeric':
                 return <Td colWidths={colWidths} className={colClass} hidden={cellState.hidden}>
                     <input 
                         type={ this.state.isText ? 'text' : 'number' }
@@ -184,7 +203,7 @@ class TableData extends React.Component {
                         onMouseDown={this.onClick}
                         onTouchMove={this.onClick}
                         onMouseMove={this.onMouseMove}
-                        onChange={(e, data)=>this.onChange(e, data, columnData.format)}
+                        onChange={(e, data)=>this.onChange(e, data, columnData.format, columnData.type)}
                         value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}                    
                     />
                 </Td>
@@ -205,6 +224,7 @@ class TableData extends React.Component {
                             position={[this.state.rowIndex,this.state.colIndex]}
                             datum={datum} 
                             columnData={columnData} 
+                            onChange={this.onChange}
                             />
                         </Td>
                 break;
@@ -219,7 +239,7 @@ class TableData extends React.Component {
                             onMouseMove={this.onMouseMove}
                             hidden={cellState.hidden}
                         >
-                        <DropdownSelection onChange={this.onChange} datum={datum} columnData={columnData} />
+                        <DropdownSelection onChange={(e,data)=>this.onChange(e,data,null,'dropdown')} datum={datum} columnData={columnData} />
                     </Td>
                 break;
             default:

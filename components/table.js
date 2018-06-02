@@ -13,7 +13,7 @@ class Table extends React.Component {
     componentDidMount = () => {
         window.addEventListener("mouseup", this.handleEnd);
         window.addEventListener("touchend", this.handleEnd);
-      };
+    };
     
     componentWillUnmount = () => {
     window.removeEventListener("mouseup", this.handleEnd);
