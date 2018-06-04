@@ -108,7 +108,8 @@ class Table extends React.Component {
                         )}
                         {data.map(
                             (dataInRow, index) => 
-                            <Row 
+							<Row 
+								formation={this.formation}
                                 key={index} 
                                 columnData={columns} 
                                 data={dataInRow} 

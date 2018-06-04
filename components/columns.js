@@ -8,6 +8,13 @@ import TableData from "./tabledata";
 import RowHeader from "./rowheader";
 
 class Columns extends React.Component {
+    sum = (rowIndex,index,cellState,data) => {
+        return rowIndex ? 
+        (cellState[index].sumTemp || cellState[index].sum):
+        cellState[index].sumTemp ?
+        cellState[index].sum+Number(data[index+2]):
+        cellState[index].sum
+    }
     render() {
         const { 
             index, 
@@ -17,6 +24,7 @@ class Columns extends React.Component {
             cellState,
             rowHeaderState,
             colHeaderState,
+            formation,
             ...rest
         } = this.props;
         const rowIndex=index;
@@ -37,11 +45,7 @@ class Columns extends React.Component {
                             colIndex={index} 
                             colWidths={colWidths[index]} 
                             datum={
-                                rowIndex ? 
-                                (cellState[index].sumTemp || cellState[index].sum):
-                                cellState[index].sumTemp ?
-                                cellState[index].sum+Number(data[index+2]):
-                                cellState[index].sum
+                                formation(this.sum(rowIndex,index,cellState,data), columnData[index].format)
                             } 
                             columnData={columnData[index]}
                             cellState={cellState[index]}

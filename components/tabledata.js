@@ -96,11 +96,8 @@ class TableData extends React.Component {
         e.preventDefault();
         const { row, col } = this.eventToCellLocation(e);
         this.props.changeCurCell([row,col]);
-        console.log('row, col: ',row, col);
     }
     deformation = (format, ...values) => {
-        console.log('values:', values);
-        
         return format ? values.map(value=> `${value}`.split(',').join('')) : values;
     }
     onChangeCycle = (type, format, row, col, ...values) => {

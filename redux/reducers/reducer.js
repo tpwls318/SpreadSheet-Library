@@ -89,7 +89,7 @@ const initialState= {
         // acc.map((row,i)=>row+Number(col[i].split(',').join('')))));
         
         return values.reduce( (acc, col) => 
-        acc.map((row,i)=>row+Number(col[i].split(',').join(''))));
+        acc.map((row,i)=>Number(`${row}`.split(',').join(''))+Number(col[i].split(',').join(''))));
     },
     afterHeaderCollapsed: ( columns, values, entries) => { //값이 저장한 후에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
