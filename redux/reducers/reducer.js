@@ -85,8 +85,8 @@ const initialState= {
     beforeHeaderCollapsed: ( columns, values, entries) => { //값을 저장하기 전에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
         console.log('columns, values, entries: ',columns, values, entries);
-        console.log(values.reduce( (acc, col) => 
-        acc.map((row,i)=>row+Number(col[i].split(',').join('')))));
+        // console.log(values.reduce( (acc, col) => 
+        // acc.map((row,i)=>row+Number(col[i].split(',').join('')))));
         
         return values.reduce( (acc, col) => 
         acc.map((row,i)=>row+Number(col[i].split(',').join(''))));

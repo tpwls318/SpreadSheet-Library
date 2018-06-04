@@ -127,13 +127,17 @@ class Table extends React.Component {
                                 columns[index].type==='dropdown' ? 
                                 <td key={index} >{ `${this.viewSelections( data.reduce( (acc,e)=> this.collectSelections( acc,e[index] ), {}) )}` }</td> :
                                 columns[index].type==='numeric' ? 
-                                <td key={index} >{this.formation(data.reduce( (acc,e)=>( acc+parseInt(`${e[index]}`.split(',').join(''))), 0),columns[index].format )}</td> :
+								<td key={index} hidden={cellState[0][index].hidden}>
+								{
+									cellState[0][index].sum?
+									this.formation(cellState.reduce( (acc,e,i)=>( acc+parseInt(`${i ? (e[index].sumTemp || e[index].sum) :e[index].sumTemp?e[index].sum+Number(data[i][index+2]):e[index].sum}`.split(',').join(''))), 0),columns[index].format ):
+									this.formation(data.reduce( (acc,e)=>( acc+parseInt(`${e[index]}`.split(',').join(''))), 0),columns[index].format )
+								}</td> :
                                 columns[index].type==='checkbox' ? 
                                 <td key={index} className='checkbox-arr'>{ this.groupingInToFive(data.reduce( (acc,e)=> this.binarify(acc, e[index]), []))
                                 .map((e,i)=><div key={i}>{e.toString()}</div>)  }</td> :
                                 <td key={index} >{data.reduce( (acc,e)=>( acc+parseInt(e[index]) ), 0) }</td>
-                            )}
-                            
+                            )} 
                         </tr>
                     </tbody>
                 </table> 

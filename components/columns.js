@@ -8,7 +8,6 @@ import TableData from "./tabledata";
 import RowHeader from "./rowheader";
 
 class Columns extends React.Component {
-
     render() {
         const { 
             index, 
@@ -37,7 +36,13 @@ class Columns extends React.Component {
                             rowIndex={rowIndex} 
                             colIndex={index} 
                             colWidths={colWidths[index]} 
-                            datum={cellState[index].sum} 
+                            datum={
+                                rowIndex ? 
+                                (cellState[index].sumTemp || cellState[index].sum):
+                                cellState[index].sumTemp ?
+                                cellState[index].sum+Number(data[index+2]):
+                                cellState[index].sum
+                            } 
                             columnData={columnData[index]}
                             cellState={cellState[index]}
                             colHeaderState={colHeaderState}
