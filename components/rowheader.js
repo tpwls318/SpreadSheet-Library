@@ -93,6 +93,7 @@ class RowHeader extends React.Component {
     render () {
         // console.log('props in rowheader:', this.props);
         return (<th 
+                    className={"row-headers"}
                     onClick={this.onClick}
                     onTouchStart={this.onClick}
                     onMouseDown={this.onClick}

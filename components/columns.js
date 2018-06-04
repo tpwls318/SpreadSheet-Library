@@ -28,9 +28,21 @@ class Columns extends React.Component {
                     cellState={cellState} 
                     rowHeaderState={rowHeaderState[index]}
                     {...rest}
-                    />
+                />
                 {data.map(
                     (datum, index) => 
+                    cellState[index].sum ?
+                        <TableData 
+                            key={index} 
+                            rowIndex={rowIndex} 
+                            colIndex={index} 
+                            colWidths={colWidths[index]} 
+                            datum={cellState[index].sum} 
+                            columnData={columnData[index]}
+                            cellState={cellState[index]}
+                            colHeaderState={colHeaderState}
+                            {...rest}
+                        />:
                         <TableData 
                             key={index} 
                             rowIndex={rowIndex} 

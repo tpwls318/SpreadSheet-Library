@@ -23,47 +23,75 @@ class Header extends React.Component {
         })
         return result;
     }
+    valuesToObject = (data, cols) => 
+        Object.assign({},...cols.map( col=>({[col]:data.map(row=>row[col])}) ))
+    
     selectColumn = (e, i, colSpan, CHI) => {
+        const   { 
+                    colHeaderState, 
+                    index, 
+                    data, 
+                    nestedHeaders, 
+                    curCell, 
+                    selections, 
+                    cellState, 
+                    changeCurCell, 
+                    saveState, 
+                    setColHeaderState,
+                    beforeHeaderCollapsed,
+                    afterHeaderCollapsed,
+                } = this.props;
         acc=0;
         console.log(Array.from({length: colSpan||1},(e,j)=>colSpan?i-colSpan+1+j:i+j));
-        console.log(this.props.colHeaderState);
+        console.log(colHeaderState);
         
         let span = Array.from({length: colSpan||1},(e,j)=>colSpan?i-colSpan+1+j:i+j);
         if (e.target.tagName === 'I') {
-            console.log('button : ',e.target.tagName, this.props.index);
+            console.log('button : ', e.target.tagName, index);
             console.log('i, colSpan, CHI, span: ', i, colSpan, CHI, span);
-            
+            console.log('obj', this.valuesToObject(data, span));
+            let headerObj = this.valuesToObject(data, span);
+            let sumOfCOls =
+            beforeHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
+            let [first, ...rest] = span;
+            rest.pop();
+            if(cellState.reduce( (acc,row)=> acc.map((e,i)=>Object.assign(e,row[i]))).slice(rest[0],rest[rest.length-1]+1)
+            .every(e=>e.hidden===undefined ? true : e.hidden) )
+            sumOfCOls.forEach((val,i) => {
+                saveState([i,span[0]], 'sum', this.state.isExtended ? val: this.state.isExtended )
+            }); 
             this.setState(prev=>({isExtended: !prev.isExtended}))
-            span=span.slice(this.headersToSpan(this.props.nestedHeaders)[CHI][i-colSpan+1][0])
-            this.props.setColHeaderState([CHI, span], 'hidden', !this.props.colHeaderState[CHI][span[0]].hidden)
+            span=span.slice(this.headersToSpan(nestedHeaders)[CHI][i-colSpan+1][0])
+            setColHeaderState([CHI, span], 'hidden', !colHeaderState[CHI][span[0]].hidden)
+            afterHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
         }
         else {
             if( e.ctrlKey || e.metaKey ){
-                this.props.changeCurCell([`h${this.props.index}`,span]);
-                this.props.setColHeaderState([CHI, span], 'selected', !this.props.colHeaderState[CHI][span[0]].selected)
+                changeCurCell([`h${index}`,span]);
+                setColHeaderState([CHI, span], 'selected', !colHeaderState[CHI][span[0]].selected)
             }
             else if ( e.shiftKey ){
-                this.props.selections.forEach((position,i) => {
-                    this.props.saveState(position, 'selected', false)
+                selections.forEach((position,i) => {
+                    saveState(position, 'selected', false)
                 }); 
-                let length=this.props.curCell[1][0]<=span[0] ? 
-                span[span.length-1]-this.props.curCell[1][0]+1:
-                this.props.curCell[1][this.props.curCell[1].length-1]-span[0]+1;
+                let length=curCell[1][0]<=span[0] ? 
+                span[span.length-1]-curCell[1][0]+1:
+                curCell[1][curCell[1].length-1]-span[0]+1;
                 let newSpan = 
-                this.props.curCell[1][0]<=span[0] ?  
-                Array.from({length},(e,i)=>i+this.props.curCell[1][0]):
+                curCell[1][0]<=span[0] ?  
+                Array.from({length},(e,i)=>i+curCell[1][0]):
                 Array.from({length},(e,i)=>i+span[0])
 
-                this.props.setColHeaderState([CHI, newSpan], 'selected', !this.props.colHeaderState[CHI][newSpan[0]].selected)
+                setColHeaderState([CHI, newSpan], 'selected', !colHeaderState[CHI][newSpan[0]].selected)
                 }
             else if(e.type === 'click')
             {
-                this.props.changeCurCell([`h${this.props.index}`,span]);
-                this.props.selections.forEach(position => {
-                    this.props.saveState(position, 'selected', false)
+                changeCurCell([`h${index}`,span]);
+                selections.forEach(position => {
+                    saveState(position, 'selected', false)
                 });
-                this.props.setColHeaderState([CHI, span], 'selected', !this.props.colHeaderState[CHI][span[0]].selected)
-                console.log('selections,curCell,cellState',this.props.selections, this.props.curCell,this.props.cellState);
+                setColHeaderState([CHI, span], 'selected', !colHeaderState[CHI][span[0]].selected)
+                console.log('selections,curCell,cellState',selections, curCell,cellState);
             } 
         }
     }
@@ -80,6 +108,8 @@ class Header extends React.Component {
         NH
         .map(e1=>e1.map(e2=>e2.colspan?e2.colspan:1))
         .reduce( (acc,e,i,array)=>array[arr.push(this.wrap([...acc],[...e].reverse()) )])
+        console.log(arr);
+        
         return arr;
     }
     foldHeader = (CHI, i, colSpan) => {
@@ -137,11 +167,14 @@ const Th = styled.th`
     width: ${props=>props.colWidths}px
 `
 const mapStateToProps = state => {
-    const { selectionStarted, colHeaderState, nestedHeaders } = state;
+    const { selectionStarted, colHeaderState, nestedHeaders, beforeHeaderCollapsed, afterHeaderCollapsed, data } = state;
     return {
         selectionStarted,
         colHeaderState,
-        nestedHeaders
+        nestedHeaders,
+        beforeHeaderCollapsed,
+        afterHeaderCollapsed,
+        data
     }
 }
 const mapDispatchToProps = dispatch =>

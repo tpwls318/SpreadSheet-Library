@@ -33,11 +33,12 @@ const setRowHeaderState = (rows, key, value) => ({
     key,
     value
 })
-const setColHeaderState = (cols, key, value) => ({
+const setColHeaderState = (cols, key, value, isCollapsed) => ({
     type: SET_CH_STATE,
     cols,
     key,
-    value
+    value,
+    isCollapsed
 })
 
 // X Action Creators

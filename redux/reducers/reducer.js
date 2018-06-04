@@ -2,7 +2,7 @@
 
 //Reducer
 const getData = (rows, cols) => {
-    return Array.from({ length: rows }, (e,i) => new Array(cols).fill(0).fill('Kia',1,2) );
+    return Array.from({ length: rows }, (e,i) => new Array(cols).fill('0').fill(10000,1,2) );
     // [[
     // ]]
 }
@@ -21,12 +21,16 @@ const initialState= {
     columns: [ //각 컬럼의 속성과 기본 값들을 설정 가능
         {},
         {
-            type: 'dropdown',
-            selectOptions: ['Kia', 'Nissan', 'Toyota', 'Honda']
+            type: 'numeric',
+            format: '0,000',
+            // type: 'dropdown',
+            // selectOptions: ['Kia', 'Nissan', 'Toyota', 'Honda']
         },
         {
-            type: 'checkbox',
-            checkOptions: ['want some?']
+            type: 'numeric',
+            format: '0,000',
+            // type: 'checkbox',
+            // checkOptions: ['want some?']
             // checkOptions: ['bulgogi', 'kimchi', 'pajeon', 'samso']
         },
         {
@@ -78,10 +82,16 @@ const initialState= {
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
         console.log('afterChange');
     },
-    beforeHeaderCollapsed: (changes) => { //값을 저장하기 전에 콜되는 함수
+    beforeHeaderCollapsed: ( columns, values, entries) => { //값을 저장하기 전에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
+        console.log('columns, values, entries: ',columns, values, entries);
+        console.log(values.reduce( (acc, col) => 
+        acc.map((row,i)=>row+Number(col[i].split(',').join('')))));
+        
+        return values.reduce( (acc, col) => 
+        acc.map((row,i)=>row+Number(col[i].split(',').join(''))));
     },
-    afterHeaderCollapsed: (changes) => { //값이 저장한 후에 콜되는 함수
+    afterHeaderCollapsed: ( columns, values, entries) => { //값이 저장한 후에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
     },
     editor: 'text', //false면 수정이 불가능합니다.
@@ -101,7 +111,7 @@ function reducer(state = initialState, action){
         case 'SET_RH_STATE':
             return applySetRowHeaderState(state, action.rows, action.key, action.value)
         case 'SET_CH_STATE':
-            return applySetColHeaderState(state, action.cols, action.key, action.value)
+            return applySetColHeaderState(state, action.cols, action.key, action.value, action.isCollapsed)
         default:
             return state;  
     }
@@ -160,14 +170,14 @@ const applySetRowHeaderState = (state, rows, key, value) =>
             )
             }
 )
-const applySetColHeaderState = (state, cols, key, value) => 
+const applySetColHeaderState = (state, cols, key, value, isCollapsed) => 
     (
-        key!=='selected'?
+        isCollapsed?
         {
             ...state,
             colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
             cellState: state.cellState.map((eRow)=>
-                eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol ) 
+                eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
             )
         }:
         {
@@ -176,7 +186,7 @@ const applySetColHeaderState = (state, cols, key, value) =>
             cellState: state.cellState.map((eRow)=>
                 eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
             )
-            }
+        }
 )
 // X Reducer
 
