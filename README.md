@@ -8,3 +8,11 @@
 - CSS Modules
 - Typography.js
 - Build for Production    
+
+#drag
+#header
+#shift
+#ctrl/cmd
+- drag
+- click
+- header

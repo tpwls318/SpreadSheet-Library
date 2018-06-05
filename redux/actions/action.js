@@ -6,6 +6,8 @@ const CHANGE_CUR_CELL = 'CHANGE_CUR_CELL';
 const TOGGLE_SEL_STARTED = 'TOGGLE_SEL_STARTED';
 const SET_RH_STATE = 'SET_RH_STATE';
 const SET_CH_STATE = 'SET_CH_STATE';
+const SET_SELECTION = 'SET_SELECTION';
+
 //Action Creators
 
 const saveData = (position, value) => ({
@@ -40,7 +42,10 @@ const setColHeaderState = (cols, key, value, isCollapsed) => ({
     value,
     isCollapsed
 })
-
+const setSelection = (position) => ({
+    type: SET_SELECTION,
+    position
+})
 // X Action Creators
 
 const actionCreators = {
@@ -50,6 +55,7 @@ const actionCreators = {
     toggleSelectionStarted,
     setRowHeaderState,
     setColHeaderState,
+    setSelection,
 }
 
 export default actionCreators;

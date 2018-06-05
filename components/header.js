@@ -40,6 +40,7 @@ class Header extends React.Component {
                     setColHeaderState,
                     beforeHeaderCollapsed,
                     afterHeaderCollapsed,
+                    setSelection,
                 } = this.props;
         acc=0;
         
@@ -105,6 +106,7 @@ class Header extends React.Component {
             else if(e.type === 'click')
             {
                 changeCurCell([`h${index}`,span]);
+                setSelection(false)
                 selections.forEach(position => {
                     saveState(position, 'selected', false)
                 });
@@ -202,6 +204,7 @@ const mapDispatchToProps = dispatch =>
         saveState: bindActionCreators(actionCreators.saveState, dispatch),
         saveData: bindActionCreators(actionCreators.saveData, dispatch),
         changeCurCell: bindActionCreators(actionCreators.changeCurCell, dispatch),
-        setColHeaderState: bindActionCreators(actionCreators.setColHeaderState, dispatch)
+        setColHeaderState: bindActionCreators(actionCreators.setColHeaderState, dispatch),
+        setSelection: bindActionCreators(actionCreators.setSelection, dispatch),
     })
 export default connect(mapStateToProps, mapDispatchToProps)(Header);

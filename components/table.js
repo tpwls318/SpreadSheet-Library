@@ -88,8 +88,9 @@ class Table extends React.Component {
         ,[]).filter(e=>e.length);
         
         return (
-            <div style={{overflowX: 'true'}}>
+            <div style={{margin:'50px',width:'850px',height:'1000px',overflow: 'scroll'}}>
                 <ContextMenu />
+				<div style={{width:'983px',height:'1185px'}}>
                 <table className="table">
                     <tbody >
                         {nestedHeaders.map(
@@ -142,6 +143,7 @@ class Table extends React.Component {
                         </tr>
                     </tbody>
                 </table> 
+				</div>
             </div>
         )
     }

@@ -61,13 +61,14 @@ class Columns extends React.Component {
 }
 
 const mapStateToProps = state => {
-    const { selectionStarted, rowHeaderState, colHeaderState, beforeChange, afterChange  } = state;
+    const { selectionStarted, rowHeaderState, colHeaderState, beforeChange, afterChange, selectedArea  } = state;
     return {
         selectionStarted,
         rowHeaderState,
         colHeaderState,
         beforeChange,
-        afterChange
+        afterChange,
+        selectedArea,
     }
 }
 const mapDispatchToProps = dispatch =>
@@ -77,5 +78,6 @@ const mapDispatchToProps = dispatch =>
         changeCurCell: bindActionCreators(actionCreators.changeCurCell, dispatch),
         toggleSelectionStarted: bindActionCreators(actionCreators.toggleSelectionStarted, dispatch),
         setRowHeaderState: bindActionCreators(actionCreators.setRowHeaderState, dispatch),
+        setSelection: bindActionCreators(actionCreators.setSelection, dispatch),
     })
 export default connect(mapStateToProps, mapDispatchToProps)(Columns);

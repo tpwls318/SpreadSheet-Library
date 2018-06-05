@@ -14,7 +14,7 @@ class Row extends React.Component {
             } = this.props;
         return (
             <tr>
-                { nestedHeader && (!this.props.index && <td rowSpan={headerLength}></td>)}
+                { nestedHeader && (!this.props.index && <td className="edge" rowSpan={headerLength}></td>)}
                 {                     
                 nestedHeader ? 
                 <Header 

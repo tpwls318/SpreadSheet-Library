@@ -2,46 +2,56 @@
 
 //Reducer
 const getData = (rows, cols) => {
-    return Array.from({ length: rows }, (e,i) => new Array(cols).fill('0').fill(10000,1,2) );
+    let arr = ['김인긔','구일몽','이허용','이웅히','왕중희','박중헌','하자연','에이브','전빽길','안충봉','꺄르로스','인성멘토','이원곡','백용재','꺄재현','구준표','이슬참','','','']
+    return Array.from({ length: rows }, (e,i) => new Array(cols).fill('0').fill(10000,1,2).fill(arr[i],0,1) );
     // [[
     // ]]
 }
 // settings
 const initialState= {
-    data: getData(20, 5), //데이터를 연결
+    data: getData(20, 7), //데이터를 연결
     selectionStarted: false,
+    selectedArea: [[[],[]]],
     nestedHeaders: [ //헤더부분
-        ['A', {label: 'B', colspan: 3}, 'C'],
-        ['D', {label: 'E', colspan: 2}, 'F', 'G'],
-        ['N', 'O', 'P', 'Q', 'R']
+        ['', {label: '총 급여', colspan: 4}, {label: '자산', colspan: 2}],
+        ['', '',{label: '과세 항목', colspan: 3}, {label: '부동 자산', colspan: 2}],
+        ['이름', '급여 합계', '기본급', '연장수당', '휴일수당', '승용차', '집']
     ],
     colHeaders: true, //true일 경우 기본 열 헤더가 존재
     rowHeaders: true, //true일 경우 기본 행 헤더가 존재
-    colWidths: [200, 100, 150, 200, 250], //각 열의 크기를 지정
+    colWidths: [130, 150, 100, 130, 130, 180, 100], //각 열의 크기를 지정
     columns: [ //각 컬럼의 속성과 기본 값들을 설정 가능
         {},
         {
             type: 'numeric',
             format: '0,000',
-            // type: 'dropdown',
-            // selectOptions: ['Kia', 'Nissan', 'Toyota', 'Honda']
+            
         },
         {
             type: 'numeric',
             format: '0,000',
-            // type: 'checkbox',
-            // checkOptions: ['want some?']
             // checkOptions: ['bulgogi', 'kimchi', 'pajeon', 'samso']
         },
         {
             type: 'numeric',
             format: '0,000',
         },
-        {}
+        {
+            type: 'numeric',
+            format: '0,000',
+        },
+        {
+            type: 'dropdown',
+            selectOptions: ['Kia', 'Nissan', 'Toyota', 'Honda']
+        },
+        {
+            type: 'checkbox',
+            checkOptions: ['Own house?']
+        }
     ],
     curCell: null,
-    cellState: Array.from({ length: 20 }, (e,i) => new Array(5).fill({}) ),
-    colHeaderState: Array.from({ length: 3 }, (e,i) => new Array(5).fill({}) ),
+    cellState: Array.from({ length: 20 }, (e,i) => new Array(7).fill({}) ),
+    colHeaderState: Array.from({ length: 3 }, (e,i) => new Array(7).fill({}) ),
     rowHeaderState: new Array(20).fill({selected: false}),
     cells: (col, row) => { //각 셀의 행과 열을 받아 접근할 수 있습니다.
     //col, row로 필드에 접근할 수 있습니다.
@@ -65,7 +75,7 @@ const initialState= {
         let nextVal={};
         nextVal['value'] =
         type === 'numeric' ? `${Math.round(Number(curVal)/10)*10}`:
-        type === undefined ? removeChar(curVal):  
+        // type === undefined ? removeChar(curVal):  
         curVal
         console.log(`
             row: ${row}, 
@@ -112,6 +122,8 @@ function reducer(state = initialState, action){
             return applySetRowHeaderState(state, action.rows, action.key, action.value)
         case 'SET_CH_STATE':
             return applySetColHeaderState(state, action.cols, action.key, action.value, action.isCollapsed)
+        case 'SET_SELECTION':
+            return applySetSelection(state, action.position)
         default:
             return state;  
     }
@@ -176,7 +188,7 @@ const applySetRowHeaderState = (state, rows, key, value) =>
                 eRow 
             )
             }
-)
+    )
 const applySetColHeaderState = (state, cols, key, value, isCollapsed) => 
     (
         isCollapsed?
@@ -194,7 +206,13 @@ const applySetColHeaderState = (state, cols, key, value, isCollapsed) =>
                 eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
             )
         }
-)
+    )
+const applySetSelection = (state, position) => ({
+            ...state, 
+            selectedArea: position ? toggleSelect([...state.selectedArea], position).length===state.selectedArea.length ?
+            [ ...toggleSelect([...state.selectedArea], position), position]:[ ...toggleSelect([...state.selectedArea], position)]: [[[],[]]]
+        })
+const toggleSelect = (array ,target) => array.filter( e => JSON.stringify(e)!==JSON.stringify(target))
 // X Reducer
 
 export default reducer;

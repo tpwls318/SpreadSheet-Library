@@ -34,6 +34,8 @@ class TableData extends React.Component {
             default:
                 break;
         }
+        let minPos=[condition[0],condition[2]], maxPos=[condition[1],condition[3]];
+        this.props.setSelection([minPos,maxPos])
         for (let rowI = condition[0]; rowI <= condition[1]; rowI++) {
             for (let colI = condition[2]; colI <= condition[3]; colI++) {
                 console.log('row, col :',rowI,colI);
@@ -44,41 +46,54 @@ class TableData extends React.Component {
     onClick = e => {
         // e.preventDefault();
         const { row, col }=this.eventToCellLocation(e);
-        // console.log('row, col, this.props.curCell: ',row, col, this.props.curCell);
-        // console.log('e.type,this.props.selectionStarted: ',e.type,this.props.selectionStarted);
+        const { 
+                changeCurCell,
+                saveState,
+                cellState,
+                selections,
+                curCell,
+                toggleSelectionStarted,
+                setSelection, 
+              } = this.props;
+        // console.log('row, col, curCell: ',row, col, curCell);
+        // console.log('e.type,selectionStarted: ',e.type,selectionStarted);
         if( e.ctrlKey || e.metaKey ){
             if( e.type === 'click'){
-                this.props.changeCurCell([row,col]);
-                this.props.saveState([row,col], 'selected', !this.props.cellState.selected)
-                console.log('selections,cellState',this.props.selections,this.props.cellState);
+                changeCurCell([row,col]);
+                saveState([row,col], 'selected', !cellState.selected)
+                setSelection([[row,col],[row,col]])
+                console.log('selections,cellState',selections,cellState);
                 console.log(e.type);
             }
         }
         else if ( e.shiftKey || e.type==='touchmove' ){
-            this.props.selections.forEach((position,i) => {
-                this.props.saveState(position, 'selected', false)
+            selections.forEach((position,i) => {
+                saveState(position, 'selected', false)
             }); 
-            // console.log(this.props.curCell);
+
             let pos=[row, col];
-            this.props.curCell[0]<=row ? 
-            this.props.curCell[1]<=col ? this.shiftSelect('LL',...pos): this.shiftSelect('LS',...pos) :
-            this.props.curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
-            // console.log('cellState',this.props.cellState);
+            curCell[0]<=row ? 
+            curCell[1]<=col ? this.shiftSelect('LL',...pos): this.shiftSelect('LS',...pos) :
+            curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
+            // console.log('cellState',cellState);
         }
         else if( e.type === 'click' || (e.type === 'mousedown'&&!e.button) || e.type === 'touchstart'){
             if( e.type !== 'click' )
-                this.props.toggleSelectionStarted(true)
-            this.props.changeCurCell([row,col]);
-            this.props.selections.forEach(position => {
-                this.props.saveState(position, 'selected', false)
+                toggleSelectionStarted(true)
+            
+            changeCurCell([row,col]);
+            setSelection(false)
+            selections.forEach(position => {
+                saveState(position, 'selected', false)
             });
-            console.log('selections,curCell,cellState',this.props.selections, this.props.curCell,this.props.cellState,e.button);
+            console.log('selections,curCell,cellState',selections, curCell,cellState,e.button);
         }         
     }
     onMouseMove = e => {
         e.preventDefault();
         const { row, col }=this.eventToCellLocation(e);
         if (this.props.selectionStarted) {
+            this.props.setSelection(false)
             this.props.selections.forEach((position,i) => {
                 this.props.saveState(position, 'selected', false)
             }); 
@@ -178,17 +193,24 @@ class TableData extends React.Component {
         };
       };
     render() {
-        // console.log('props in TableData!!!!',this.props);
-        const { colWidths, datum, index, saveData, columnData, curCell, colHeaderState, cellState} = this.props;
+        console.log('props in TableData!!!!',this.props);
+        // rowIndex===selectedArea[0][0] && colIndex>=selectedArea[0][1] && colIndex<=selectedArea[1][1]
+        const { colWidths, datum, index, saveData, columnData, curCell, colHeaderState, cellState, selectedArea, rowIndex, colIndex} = this.props;
+        selectedArea.some( SA => rowIndex===SA[0][0] && colIndex>=SA[0][1] && colIndex<=SA[1][1])
         let colClass = classNames({
            'col-selected': cellState.selected,
-           'recent-selected': !!curCell && [this.state.rowIndex,this.state.colIndex].map((x,i)=>x===curCell[i]).every(b=>b)
+           'recent-selected': !!curCell && [this.state.rowIndex,this.state.colIndex].map((x,i)=>x===curCell[i]).every(b=>b),
+           'selection-top': selectedArea.some(SA => rowIndex===SA[0][0] && colIndex>=SA[0][1] && colIndex<=SA[1][1]),
+           'selection-right': selectedArea.some(SA => colIndex===SA[1][1] && rowIndex>=SA[0][0] && rowIndex<=SA[1][0]),
+           'selection-bottom': selectedArea.some(SA => rowIndex===SA[1][0] && colIndex>=SA[0][1] && colIndex<=SA[1][1]),
+           'selection-left': selectedArea.some(SA => colIndex===SA[0][1] && rowIndex>=SA[0][0] && rowIndex<=SA[1][0]),
         })
         switch (columnData.type) {
             case 'numeric':
                 return <Td colWidths={colWidths} className={colClass} hidden={cellState.hidden}>
                     <input 
                         type={ this.state.isText ? 'text' : 'number' }
+                        onFocus={(e)=>{e.preventDefault();e.target.select()}}
                         // onFocus={()=>{(this.setState(prevState=>({isText: false})));this.onClick();}}
                         onBlur={()=>(this.setState(prevState=>({isText: true})))}
                         className={'numeric '+colClass}
@@ -216,12 +238,12 @@ class TableData extends React.Component {
                             onMouseMove={this.onMouseMove}
                             hidden={cellState.hidden}
                         >
-                          <CustomCheckbox 
-                            saveData={saveData} 
-                            position={[this.state.rowIndex,this.state.colIndex]}
-                            datum={datum} 
-                            columnData={columnData} 
-                            onChange={this.onChange}
+                            <CustomCheckbox 
+                                saveData={saveData} 
+                                position={[this.state.rowIndex,this.state.colIndex]}
+                                datum={datum} 
+                                columnData={columnData} 
+                                onChange={this.onChange}
                             />
                         </Td>
                 break;
