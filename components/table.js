@@ -88,7 +88,7 @@ class Table extends React.Component {
         ,[]).filter(e=>e.length);
         
         return (
-            <div style={{overflowX: 'auto'}}>
+            <div style={{overflowX: 'true'}}>
                 <ContextMenu />
                 <table className="table">
                     <tbody >
@@ -131,7 +131,7 @@ class Table extends React.Component {
 								<td key={index} hidden={cellState[0][index].hidden}>
 								{
 									cellState[0][index].sum?
-									this.formation(cellState.reduce( (acc,e,i)=>( acc+parseInt(`${i ? (e[index].sumTemp || e[index].sum) :e[index].sumTemp?e[index].sum+Number(data[i][index+2]):e[index].sum}`.split(',').join(''))), 0),columns[index].format ):
+									this.formation(cellState.reduce( (acc,e,i)=>( acc+parseInt(`${e[index].sumTemp || e[index].sum }`.split(',').join(''))), 0),columns[index].format ):
 									this.formation(data.reduce( (acc,e)=>( acc+parseInt(`${e[index]}`.split(',').join(''))), 0),columns[index].format )
 								}</td> :
                                 columns[index].type==='checkbox' ? 

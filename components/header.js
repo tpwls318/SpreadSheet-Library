@@ -26,6 +26,7 @@ class Header extends React.Component {
     valuesToObject = (data, cols) => 
         Object.assign({},...cols.map( col=>({[col]:data.map(row=>row[col])}) ))
     selectColumn = (e, i, colSpan, CHI) => {
+        
         const   { 
                     colHeaderState, 
                     index, 
@@ -41,6 +42,7 @@ class Header extends React.Component {
                     afterHeaderCollapsed,
                 } = this.props;
         acc=0;
+        
         console.log(Array.from({length: colSpan||1},(e,j)=>colSpan?i-colSpan+1+j:i+j));
         console.log(colHeaderState);
         
@@ -55,8 +57,11 @@ class Header extends React.Component {
             console.log('sumOfCOls',sumOfCOls);
             let [first, ...rest] = span;
             rest.pop();
-            if(cellState.reduce( (acc,row)=> acc.map((e,i)=>Object.assign(e,row[i]))).slice(rest[0],rest[rest.length-1]+1)
-            .every(e=>e.hidden) )
+            // if(cellState.reduce( (acc,row)=> acc.map((e,i)=>({...e,...row[i]}))).slice(rest[0],rest[rest.length-1]+1)
+            // .every(e=>e.hidden) )
+            if(cellState[0].slice(rest[0],rest[rest.length-1]+1).every(e=>e.hidden) )
+            {
+                console.log('abcabac',JSON.stringify(cellState[0]));
                 sumOfCOls.forEach((val,i) => {
                     saveState([i,span[0]], 'sum', this.state.isExtended ? val: this.state.isExtended )
                     if(!this.state.isExtended){
@@ -64,6 +69,8 @@ class Header extends React.Component {
                         saveState([i,span[0]], 'sumTemp', this.state.isExtended )
                     }
                 }); 
+            }
+                
             else {
                 sumOfCOls.forEach((val,i) => {
                     console.log('sumTemp', val);
@@ -74,7 +81,7 @@ class Header extends React.Component {
             span=span.slice(this.headersToSpan(nestedHeaders)[CHI][i-colSpan+1][0])
             setColHeaderState([CHI, span], 'hidden', !colHeaderState[CHI][span[0]].hidden)
             afterHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
-            console.log('zxczxczxc',cellState[0]);
+            console.log('zxczxczxc',JSON.stringify(cellState[0]));
         }
         else {
             if( e.ctrlKey || e.metaKey ){
@@ -137,6 +144,7 @@ class Header extends React.Component {
     }
     render() {
         console.log('props in header: ',this.props);
+        console.log('in render',JSON.stringify(this.props.cellState[0]));
         console.log('qweiqwieouqweoiu',this.props.cellState[0][1].sumTemp);
         const { isExtended } = this.state;
         const { nestedHeader, colWidths, saveState, colHeaderState } = this.props;

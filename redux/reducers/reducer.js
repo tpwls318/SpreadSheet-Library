@@ -128,15 +128,22 @@ const applySaveData = (state, position, value) =>
             ) : e
         )),
     })
+const changeOne = (arr, position, key, value) => {
+    let newArr = [...arr];
+    const [row, col] = position;
+    newArr[row][col] = {...newArr[row][col], [key]: value}
+    return newArr;
+}
 const applySaveState = (state, position, key, value) =>
     ({
         ...state,
-        cellState: state.cellState.map((eRow,i)=>(
-            i===position[0] ? eRow.map((eCol,i)=>(
-                i===position[1] ? {...eCol, [key]: value} : eCol
-                )          
-            ) : eRow
-        ))
+        cellState: changeOne([...state.cellState], position, key, value)
+        // state.cellState.map((eRow,i)=>(
+        //     i===position[0] ? eRow.map((eCol,i)=>(
+        //         i===position[1] ? {...eCol, [key]: value} : eCol
+        //         )          
+        //     ) : eRow
+        // ))
     })
 const applyChangeCurCell = (state, position) =>
     ({
