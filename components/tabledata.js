@@ -38,7 +38,7 @@ class TableData extends React.Component {
         this.props.setSelection([minPos,maxPos])
         for (let rowI = condition[0]; rowI <= condition[1]; rowI++) {
             for (let colI = condition[2]; colI <= condition[3]; colI++) {
-                console.log('row, col :',rowI,colI);
+                // console.log('row, col :',rowI,colI);
                 this.props.saveState([rowI,colI], 'selected', true)
             }   
         }
@@ -51,6 +51,7 @@ class TableData extends React.Component {
                 saveState,
                 cellState,
                 selections,
+                cellStates,
                 curCell,
                 toggleSelectionStarted,
                 setSelection, 
@@ -62,39 +63,54 @@ class TableData extends React.Component {
                 changeCurCell([row,col]);
                 saveState([row,col], 'selected', !cellState.selected)
                 setSelection([[row,col],[row,col]])
-                console.log('selections,cellState',selections,cellState);
-                console.log(e.type);
+                // console.log('selections,cellState',selections,cellState);
+                // console.log(e.type);
             }
         }
-        else if ( e.shiftKey || e.type==='touchmove' ){
-            selections.forEach((position,i) => {
-                saveState(position, 'selected', false)
-            }); 
-
-            let pos=[row, col];
-            curCell[0]<=row ? 
-            curCell[1]<=col ? this.shiftSelect('LL',...pos): this.shiftSelect('LS',...pos) :
-            curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
-            // console.log('cellState',cellState);
+        else if ( e.shiftKey ){
+            if (e.type==='click') {
+                let selections = cellStates.reduce( (acc,e,rowI) => 
+                acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
+                 ,[]);
+                setSelection(false)
+                selections.forEach((position,i) => {
+                    saveState(position, 'selected', false)
+                }); 
+                let pos=[row, col];
+                // console.log('curCell,pos: ',curCell, pos);
+                curCell[0]<=row ? 
+                curCell[1]<=col ? this.shiftSelect('LL',...pos): this.shiftSelect('LS',...pos) :
+                curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
+                // console.log('cellState',cellState);
+            }
         }
-        else if( e.type === 'click' || (e.type === 'mousedown'&&!e.button) || e.type === 'touchstart'){
+        else if( e.type === 'click' || (e.type === 'mousedown' && !e.button ) || e.type === 'touchstart'){
             if( e.type !== 'click' )
                 toggleSelectionStarted(true)
             
+            // console.log(e.type);
             changeCurCell([row,col]);
             setSelection(false)
             selections.forEach(position => {
                 saveState(position, 'selected', false)
             });
-            console.log('selections,curCell,cellState',selections, curCell,cellState,e.button);
+            // console.log('selections,curCell,cellState',selections, curCell,cellState,e.button);
         }         
     }
     onMouseMove = e => {
-        e.preventDefault();
-        const { row, col }=this.eventToCellLocation(e);
+        // console.log(this.props.selectedArea);
+        
+        
+    
         if (this.props.selectionStarted) {
+            e.preventDefault();
+            const { row, col }=this.eventToCellLocation(e);
+            let selections = this.props.cellStates.reduce( (acc,e,rowI) => 
+             acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
+             ,[]);
             this.props.setSelection(false)
-            this.props.selections.forEach((position,i) => {
+            // console.log('selections',this.props.selections);
+            selections.forEach((position,i) => {
                 this.props.saveState(position, 'selected', false)
             }); 
             // console.log(this.props.curCell);
@@ -171,11 +187,6 @@ class TableData extends React.Component {
     alignHandler = e => {
         this.setState(prev=>({align:e}))
     }
-    handleTouchMoveCell = e => {
-          e.preventDefault();
-          const { row, col } = this.eventToCellLocation(e);
-          console.log('row, col: ',row, col);
-      };
     eventToCellLocation = e => {
         let target;
         if (e.touches) {
@@ -193,10 +204,8 @@ class TableData extends React.Component {
         };
       };
     render() {
-        console.log('props in TableData!!!!',this.props);
-        // rowIndex===selectedArea[0][0] && colIndex>=selectedArea[0][1] && colIndex<=selectedArea[1][1]
+        // console.log('props in TableData!!!!',this.props);
         const { colWidths, datum, index, saveData, columnData, curCell, colHeaderState, cellState, selectedArea, rowIndex, colIndex} = this.props;
-        selectedArea.some( SA => rowIndex===SA[0][0] && colIndex>=SA[0][1] && colIndex<=SA[1][1])
         let colClass = classNames({
            'col-selected': cellState.selected,
            'recent-selected': !!curCell && [this.state.rowIndex,this.state.colIndex].map((x,i)=>x===curCell[i]).every(b=>b),
@@ -220,7 +229,7 @@ class TableData extends React.Component {
                         }}
                         onTouchStart={this.onClick}
                         onMouseDown={this.onClick}
-                        onTouchMove={this.onClick}
+                        onTouchMove={this.onMouseMove}
                         onMouseMove={this.onMouseMove}
                         onChange={(e, data)=>this.onChange(e, data, columnData.format, columnData.type)}
                         value={this.state.isText ? datum : isNaN(Number(datum))? datum.split(',').join('') : Number(datum)}                    
@@ -230,35 +239,37 @@ class TableData extends React.Component {
             case 'checkbox':
                 return  <Td 
                             colWidths={colWidths} 
-                            className={colClass} 
                             onClick={this.onClick}
                             onTouchStart={this.onClick}
-                            onMouseDown={this.onClick}
+                            onTouchMove={this.onMouseMove}
                             onTouchMove={this.onClick}
                             onMouseMove={this.onMouseMove}
                             hidden={cellState.hidden}
                         >
-                            <CustomCheckbox 
-                                saveData={saveData} 
-                                position={[this.state.rowIndex,this.state.colIndex]}
-                                datum={datum} 
-                                columnData={columnData} 
-                                onChange={this.onChange}
-                            />
+                            <div className={colClass} style={{height:'100%', paddingTop:'0.5em'}} >
+                                <CustomCheckbox 
+                                    saveData={saveData} 
+                                    position={[this.state.rowIndex,this.state.colIndex]}
+                                    datum={datum} 
+                                    columnData={columnData} 
+                                    onChange={this.onChange}
+                                />
+                            </div>
                         </Td>
                 break;
             case 'dropdown':
                 return  <Td 
                             colWidths={colWidths} 
-                            className={colClass} 
                             onClick={this.onClick}
                             onTouchStart={this.onClick}
                             onMouseDown={this.onClick}
-                            onTouchMove={this.onClick}
+                            onTouchMove={this.onMouseMove}
                             onMouseMove={this.onMouseMove}
                             hidden={cellState.hidden}
                         >
-                        <DropdownSelection onChange={(e,data)=>this.onChange(e,data,null,'dropdown')} datum={datum} columnData={columnData} />
+                        <div className={colClass} >
+                            <DropdownSelection onChange={(e,data)=>this.onChange(e,data,null,'dropdown')} datum={datum} columnData={columnData} />
+                        </div>
                     </Td>
                 break;
             default:
@@ -274,7 +285,7 @@ class TableData extends React.Component {
                         onChange={this.onChange}
                         onTouchStart={this.onClick}
                         onMouseDown={this.onClick}
-                        onTouchMove={this.onClick}
+                        onTouchMove={this.onMouseMove}
                         onMouseMove={this.onMouseMove}
                         value={datum}
                         hidden={cellState.hidden}

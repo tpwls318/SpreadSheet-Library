@@ -50,7 +50,7 @@ class Table extends React.Component {
     viewSelections = ( obj ) => {
         let result=[];
         for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
+            if ( obj.hasOwnProperty(key) && key!=='0') {
                 result.push(` ${key}: ${obj[key]}`);
             }
         }
@@ -74,7 +74,7 @@ class Table extends React.Component {
     }
 
     render() {
-        console.log('props in Table by redux', this.props);
+        // console.log('props in Table by redux', this.props);
         const {
             data,
             nestedHeaders,
@@ -85,10 +85,13 @@ class Table extends React.Component {
         } = this.props;
         const selections = cellState.reduce( (acc,e,rowI) => 
              acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
-        ,[]).filter(e=>e.length);
-        
+        ,[]);
+        // console.log('selection',cellState.reduce( (acc,e,rowI) => 
+		// acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
+//    ,[]));
+		
         return (
-            <div style={{margin:'50px',width:'850px',height:'1000px',overflow: 'scroll'}}>
+            <div style={{margin:'50px',width:'850px',height:'1000px',overflow: 'scroll',border: '1.3px solid'}}>
                 <ContextMenu />
 				<div style={{width:'983px',height:'1185px'}}>
                 <table className="table">
@@ -116,7 +119,8 @@ class Table extends React.Component {
                                 data={dataInRow} 
                                 index={index} 
                                 colWidths={colWidths} 
-                                cellState={cellState[index]}
+								cellState={cellState[index]}
+								cellStates={cellState}
                                 selections={selections} 
                                 headerLength={nestedHeaders.length} 
                                 curCell={curCell}
@@ -153,7 +157,7 @@ Table.propTypes={
     // Header: PropTypes.Component.isRequired
 }
 const mapStateToProps = state => {
-    const { data, nestedHeaders, colWidths, columns, cellState, curCell, selectionStarted } = state;
+    const { data, nestedHeaders, colWidths, columns, cellState, curCell, selectionStarted, selectedArea } = state;
     return {
         data,
         nestedHeaders,
@@ -161,7 +165,8 @@ const mapStateToProps = state => {
         columns,
         cellState,
         curCell,
-        selectionStarted,
+		selectionStarted,
+		selectedArea,
     }
 }
 const mapDispatchToProps = dispatch =>

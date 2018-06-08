@@ -59,35 +59,37 @@ class RowHeader extends React.Component {
                 setSelection([[row,0],[curRow,this.props.cellState.length-1]])
             }
         }
-        else if( e.type === 'click' || e.type === 'mousedown' || e.type === 'touchstart'){
+        else if( (e.type === 'mousedown' && !e.button ) || e.type === 'touchstart'){
             console.log(e.type);
-            
-            if( e.type !== 'click' )
-                toggleSelectionStarted(true)
+
+            toggleSelectionStarted(true)
             changeCurCell([row,0]);
             setSelection(false)
             selections.forEach(position => {
                 saveState(position, 'selected', false)
             });
-            
-            if( e.type === 'click' ){
-                setRowHeaderState([row], 'selected', !rowHeaderState.selected)
-                setSelection([[row,0],[row,this.props.cellState.length-1]])
-            }
+
             // console.log('selections,curCell,cellState',selections, curCell,cellState);
-        } 
+        } else if (e.type === 'click') {
+            changeCurCell([row,0]);
+            setSelection(false)
+            selections.forEach(position => {
+                saveState(position, 'selected', false)
+            });
+            setRowHeaderState([row], 'selected', !rowHeaderState.selected)
+            if(!rowHeaderState.selected) setSelection([[row,0],[row,this.props.cellState.length-1]])
+        }
     }
     onMouseMove = e => {
-        e.preventDefault();
-        const { row, col }=this.eventToCellLocation(e);
+        
         if( this.props.selectionStarted )
         {
+            e.preventDefault();
+            const { row, col }=this.eventToCellLocation(e);
             this.props.setSelection(false)
             this.props.selections.forEach((position,i) => {
                 this.props.saveState(position, 'selected', false)
             }); 
-            console.log(e.type, this.props.selectionStarted);
-            
             const curRow = this.props.curCell[0];
             if(curRow<=row){
                 this.props.setRowHeaderState(Array.from({length: row-curRow+1}, (v, k) => k+curRow))
@@ -112,9 +114,9 @@ class RowHeader extends React.Component {
         };
       };
     render () {
-        console.log('props in rowheader:', this.props);
+        // console.log('props in rowheader:', this.props);
         return (<th 
-                    className={"row-headers"}
+                    className={`row-headers ${ this.props.curCell[0]===this.props.rowIndex ? 'cur-header':''}`}
                     onClick={this.onClick}
                     onTouchStart={this.onClick}
                     onMouseDown={this.onClick}

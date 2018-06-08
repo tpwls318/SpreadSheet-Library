@@ -2,6 +2,7 @@ $font-stack: Helvetica, sans-serif
 $primary-color: #9f2
 $header-color: #f0f0f0
 $border-color: #b5b7b0
+$curh-color: #dddddd
 h1
   color: $primary-color !important
 
@@ -42,23 +43,26 @@ td
   height: 40px
   .recent-selected
     border: 2px solid #005eff
-  .col-selected
-    background-color: rgba(0, 94, 255, 0.1)
-    // border: 1px solid blue
-    //  rgba(0, 94, 255, 0.1) 
   input 
     margin: 0
     width: 100%
     height: 100%
     border: none 
     -webkit-appearance: textarea !important
-td.recent-selected
+// td.col-selected
+//   background-color: rgba(0, 94, 255, 0.1)
+//   border: 1.5px solid #005eff !important
+.col-selected
   background-color: rgba(0, 94, 255, 0.1)
-  border: 1.5px solid #005eff !important
+  // border: 1px solid blue
+  //  rgba(0, 94, 255, 0.1) 
+.cur-header
+  background-color: $curh-color
 .checkbox-arr
   line-height: 1.666rem  
 
 .selection-top
+  border: 0px solid !important
   border-top: 0.5px solid #005eff !important
 .selection-right
   border-right: 0.5px solid #005eff !important

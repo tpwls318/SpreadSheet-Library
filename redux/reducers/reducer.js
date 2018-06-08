@@ -1,3 +1,5 @@
+import Tree from "../Tree";
+
 // M
 
 //Reducer
@@ -7,16 +9,21 @@ const getData = (rows, cols) => {
     // [[
     // ]]
 }
+const nestedHeaders = () => [ //헤더부분
+    ['', {label: '총 급여', colspan: 4, collapsible: true}, {label: '자산', colspan: 2, collapsible: false}],
+    ['', '비과세 항목', {label: '과세 항목', colspan: 3, collapsible: true}, {label: '부동 자산', colspan: 2, collapsible: false}],
+    ['이름', '식대', '기본급', '연장수당', '휴일수당', '승용차', '집']
+];
 // settings
-const initialState= {
+const headerStateTree = (arr) => {
+    var root = new Tree();
+    root.addFamily(arr);
+    return root;
+}
+const initialState = {
     data: getData(20, 7), //데이터를 연결
     selectionStarted: false,
     selectedArea: [[[],[]]],
-    nestedHeaders: [ //헤더부분
-        ['', {label: '총 급여', colspan: 4}, {label: '자산', colspan: 2}],
-        ['', '',{label: '과세 항목', colspan: 3}, {label: '부동 자산', colspan: 2}],
-        ['이름', '급여 합계', '기본급', '연장수당', '휴일수당', '승용차', '집']
-    ],
     colHeaders: true, //true일 경우 기본 열 헤더가 존재
     rowHeaders: true, //true일 경우 기본 행 헤더가 존재
     colWidths: [130, 150, 100, 130, 130, 180, 100], //각 열의 크기를 지정
@@ -49,9 +56,11 @@ const initialState= {
             checkOptions: ['Own house?']
         }
     ],
-    curCell: null,
+    curCell: [0,0],
     cellState: Array.from({ length: 20 }, (e,i) => new Array(7).fill({}) ),
     colHeaderState: Array.from({ length: 3 }, (e,i) => new Array(7).fill({}) ),
+    headerStateTree: headerStateTree(nestedHeaders()),
+    nestedHeaders: nestedHeaders(),
     rowHeaderState: new Array(20).fill({selected: false}),
     cells: (col, row) => { //각 셀의 행과 열을 받아 접근할 수 있습니다.
     //col, row로 필드에 접근할 수 있습니다.
@@ -141,15 +150,14 @@ const applySaveData = (state, position, value) =>
         )),
     })
 const changeOne = (arr, position, key, value) => {
-    let newArr = [...arr];
     const [row, col] = position;
-    newArr[row][col] = {...newArr[row][col], [key]: value}
-    return newArr;
+    arr[row][col] = {...arr[row][col], [key]: value}
+    return arr;
 }
 const applySaveState = (state, position, key, value) =>
     ({
         ...state,
-        cellState: changeOne([...state.cellState], position, key, value)
+        cellState: changeOne(state.cellState, position, key, value)
         // state.cellState.map((eRow,i)=>(
         //     i===position[0] ? eRow.map((eCol,i)=>(
         //         i===position[1] ? {...eCol, [key]: value} : eCol
@@ -187,31 +195,79 @@ const applySetRowHeaderState = (state, rows, key, value) =>
                 eRow.map(eCol=>({...eCol, [key]: value}) ) :
                 eRow 
             )
-            }
-    )
-const applySetColHeaderState = (state, cols, key, value, isCollapsed) => 
-    (
-        isCollapsed?
-        {
-            ...state,
-            colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
-            cellState: state.cellState.map((eRow)=>
-                eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
-            )
-        }:
-        {
-            ...state,
-            colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
-            cellState: state.cellState.map((eRow)=>
-                eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
-            )
         }
     )
+const setHeaderStateTree = (tree, row, col, key, value) => {
+    let curHeader;
+    col = Array.isArray(col) ? col : [col];
+    
+    while(col.length){
+        curHeader = tree.BFSelect((label, depth)=>depth===row+1)[col.pop()];
+        curHeader[key] = value;
+        if (key==='isCollapsed'){
+            let isFirst = true;
+            curHeader.DFtraverse( (child,i,depth,deepest) => {
+                if( !(i===-1 || isFirst) ){
+                    child.hidden=value;
+                    if(!value) child.isCollapsed = value
+                }
+                if(deepest) isFirst=false;
+            })
+        } else {
+            curHeader.DFtraverse( (child,i,depth,deepest) => {
+                child[key]=value;
+            })
+        }
+    }
+    return tree;
+}    
+const applySetColHeaderState = (state, pos, key, value) => {
+        switch (key) {
+        case 'isCollapsed':
+            return ({
+                ...state,
+                headerStateTree: setHeaderStateTree(state.headerStateTree, pos[0], pos[2], key, value),
+                cellState: state.cellState.map((eRow)=>
+                    eRow.map((eCol,i)=>pos[1].includes(i)?{...eCol,hidden: value}:eCol )
+                )
+            })
+            break;
+        default:
+            return ({
+                ...state,
+                headerStateTree: setHeaderStateTree(state.headerStateTree, pos[0], pos[2], key, value),
+                cellState: state.cellState.map((eRow)=>
+                    eRow.map((eCol,i)=>pos[1].includes(i)?{...eCol,[key]: value}:eCol )
+                )
+            })
+            break;
+    }
+}
+// const applySetColHeaderState = (state, cols, key, value, isCollapsed) => 
+//     (
+//         isCollapsed?
+//         {
+//             ...state,
+//             colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
+//             cellState: state.cellState.map((eRow)=>
+//                 eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
+//             )
+//         }:
+//         {
+//             ...state,
+//             headerStateTree: setHeaderStateTree(state.headerStateTree, pos[0], pos[1], key, value),
+//             colHeaderState: state.colHeaderState.map((e,i)=>i===cols[0] ? e.map((e,i)=>(cols[1].includes(i)?{...e, [key]: value}:e)):e),
+//             cellState: state.cellState.map((eRow)=>
+//                 eRow.map((eCol,i)=>cols[1].includes(i)?({...eCol, [key]: value}):eCol )
+//             )
+//         }
+//     )
 const applySetSelection = (state, position) => ({
             ...state, 
             selectedArea: position ? toggleSelect([...state.selectedArea], position).length===state.selectedArea.length ?
             [ ...toggleSelect([...state.selectedArea], position), position]:[ ...toggleSelect([...state.selectedArea], position)]: [[[],[]]]
         })
+// filter target  
 const toggleSelect = (array ,target) => array.filter( e => JSON.stringify(e)!==JSON.stringify(target))
 // X Reducer
 

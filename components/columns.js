@@ -61,7 +61,7 @@ class Columns extends React.Component {
 }
 
 const mapStateToProps = state => {
-    const { selectionStarted, rowHeaderState, colHeaderState, beforeChange, afterChange, selectedArea  } = state;
+    const { selectionStarted, rowHeaderState, colHeaderState, beforeChange, afterChange, selectedArea } = state;
     return {
         selectionStarted,
         rowHeaderState,
