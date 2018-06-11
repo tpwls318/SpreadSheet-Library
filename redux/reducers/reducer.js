@@ -5,7 +5,7 @@ import Tree from "../Tree";
 //Reducer
 const getData = (rows, cols) => {
     let arr = ['김인긔','구일몽','이허용','이웅히','왕중희','박중헌','하자연','에이브','전빽길','안충봉','꺄르로스','인성멘토','이원곡','백용재','꺄재현','구준표','이슬참','','','']
-    return Array.from({ length: rows }, (e,i) => new Array(cols).fill('0').fill(10000,1,2).fill(arr[i],0,1) );
+    return Array.from({ length: rows }, (e,i) => new Array(cols).fill('0').fill(10000,1,2).fill(3000000,2,3).fill(arr[i],0,1) );
     // [[
     // ]]
 }
@@ -72,10 +72,10 @@ const initialState = {
     beforeChange: (type, row, col, prevVal, curVal) => {
         //값을 저장하기 전에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
-        const removeChar = (str) => {
+        const removeNumber = (str) => {
 			let result='';
             for (let e of str) {
-                if( !isNaN(Number(e)) )
+                if( isNaN(Number(e)) )
                    result+=e;
             }
             return result;
@@ -84,7 +84,7 @@ const initialState = {
         let nextVal={};
         nextVal['value'] =
         type === 'numeric' ? `${Math.round(Number(curVal)/10)*10}`:
-        // type === undefined ? removeChar(curVal):  
+        type === undefined ? removeNumber(curVal):  
         curVal
         console.log(`
             row: ${row}, 
@@ -103,12 +103,12 @@ const initialState = {
     },
     beforeHeaderCollapsed: ( columns, values, entries) => { //값을 저장하기 전에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
-        console.log('columns, values, entries: ',columns, values, entries);
+        // console.log('columns, values, entries: ',columns, values, entries);
         // console.log(values.reduce( (acc, col) => 
         // acc.map((row,i)=>row+Number(col[i].split(',').join('')))));
         
         return values.reduce( (acc, col) => 
-        acc.map((row,i)=>Number(`${row}`.split(',').join(''))+Number(col[i].split(',').join(''))));
+        acc.map((row,i)=>Number(`${row}`.split(',').join(''))+Number(`${col[i]}`.split(',').join(''))));
     },
     afterHeaderCollapsed: ( columns, values, entries) => { //값이 저장한 후에 콜되는 함수
         //changes 안에는 행, 열, 이전값, 변경값이 들어있습니다.
@@ -228,7 +228,12 @@ const applySetColHeaderState = (state, pos, key, value) => {
                 ...state,
                 headerStateTree: setHeaderStateTree(state.headerStateTree, pos[0], pos[2], key, value),
                 cellState: state.cellState.map((eRow)=>
-                    eRow.map((eCol,i)=>pos[1].includes(i)?{...eCol,hidden: value}:eCol )
+                    eRow.map((eCol,i)=>pos[1].includes(i)?{
+                        ...eCol,
+                        hidden: value,
+                        sum:!value?value:eCol.sum,
+                        sumTemp:!value?value:eCol.sumTemp
+                    }: eCol )
                 )
             })
             break;

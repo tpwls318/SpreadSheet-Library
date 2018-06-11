@@ -12,7 +12,6 @@ class Header extends React.Component {
     sum = (arr,n) => {
         let result = arr.slice(i,i+n).reduce((acc,e)=>acc+e);
         i+=n;
-        // console.log(`result,i,n :${result}, ${i}, ${n}`);
         return result;
     }
     // nestedHeader [a,{label:b, colspan:3]=> {0:0,1:3}
@@ -60,14 +59,14 @@ class Header extends React.Component {
             if( curHeaderNode.children[0].colspan && !curHeaderNode.children[0].isCollapsed){
                 sumOfCOls.forEach((val,i) => {
                     // console.log('sumTemp', val);
-                    saveState([i,firstIndex], 'sumTemp', this.state.isExtended ? val: this.state.isExtended )
+                    saveState([i,firstIndex], 'sumTemp', !curHeaderNode.isCollapsed ? val: !curHeaderNode.isCollapsed )
                 });
             } else{
                 sumOfCOls.forEach((val,i) => {
-                    saveState([i,firstIndex], 'sum', this.state.isExtended ? val: this.state.isExtended )
+                    saveState([i,firstIndex], 'sum', !curHeaderNode.isCollapsed ? val: !curHeaderNode.isCollapsed )
                     if(!this.state.isExtended){
                         // console.log('sum', val);
-                        saveState([i,firstIndex], 'sumTemp', this.state.isExtended )
+                        saveState([i,firstIndex], 'sumTemp', !curHeaderNode.isCollapsed )
                     }
                 }); 
             } 
@@ -147,9 +146,7 @@ class Header extends React.Component {
                 setColHeaderState([CHI, newSpan, headers], 'selected', !colHeaderState[CHI][newSpan[0]].selected)
                 }
             else if(e.type === 'click')
-            {
-                // console.log(headerStateTree.BFSelect((label, depth)=>depth===CHI+1), index);
-                
+            {   
                 changeCurCell([`h${index}`,span]);
                 setSelection(false)
                 selections.forEach(position => {
@@ -158,12 +155,10 @@ class Header extends React.Component {
                 if( !curHeaderNode.selected )
                     setSelection([[0,span[0]],[data.length-1,span[span.length-1]]])
                 setColHeaderState([CHI, span, index], 'selected', !curHeaderNode.selected)
-                // console.log('selections,curCell,cellState',selections, curCell,cellState);
             } 
         }
     }
     wrap = (arr1, arr2) => {
-        // arr2.reverse();
         return arr1.map((e,i)=>{
             let arr=[];
             while (e-arr2[arr2.length-1]>0 || (arr.length && e-arr2[arr2.length-1]===0) )
@@ -171,15 +166,12 @@ class Header extends React.Component {
             return arr.length ? arr : arr2.pop();
         })
     }
-    headersToSpan = (NH, arr=[]) => {
-        NH
-        .map(e1=>e1.map(e2=>e2.colspan?e2.colspan:1))
-        .reduce( (acc,e,i,array)=>array[arr.push(this.wrap([...acc],[...e].reverse()) )])
-        // console.log(arr);
-        
-        return arr;
-    }
-    // (CHI,i=endIndexOfColHeader, colspan) => 2
+    // headersToSpan = (NH, arr=[]) => {
+    //     NH
+    //     .map(e1=>e1.map(e2=>e2.colspan?e2.colspan:1))
+    //     .reduce( (acc,e,i,array)=>array[arr.push(this.wrap([...acc],[...e].reverse()) )])
+    //     return arr;
+    // }
     foldHeader = (curHeader) => 
         curHeader.children.reduce( (acc, child) => acc+=child.hidden ? 0: (child.isCollapsed||!child.colspan) ? 1 :child.colspan ,0)
 
@@ -199,9 +191,7 @@ class Header extends React.Component {
     //     return arr.reduce((acc,e)=>(Number.isInteger(e))?acc+1:acc,0);
     // }
     render() {
-        // console.log('props in header: ',this.props);
-        // console.log('in render',JSON.stringify(this.props.cellState[0]));
-        // console.log('qweiqwieouqweoiu',this.props.cellState[0][1].sumTemp);
+        console.log('props in header: ',this.props);
         const { isExtended } = this.state;
         const { nestedHeader, colWidths, saveState, colHeaderState, headerStateTree, curCell } = this.props;
         const CHI = this.props.index;
@@ -235,7 +225,6 @@ class Header extends React.Component {
                             onClick={e=>this.selectColumn(e,this.headerIndex(nestedHeader)[index],null,CHI, index)} 
                             key={index} 
                             hidden={headerStateTree.BFSelect((lable, depth)=>depth===CHI+1)[index].hidden}
-                            // hidden={ this.foldHeader(CHI, this.headerIndex(nestedHeader)[index], h.colspan)}
                         >{h}</Th>
                 )}  
             </React.Fragment>

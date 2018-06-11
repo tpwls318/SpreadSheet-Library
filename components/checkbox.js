@@ -7,5 +7,4 @@ const CustomCheckbox = ({saveData, position, datum, columnData, onChange}) =>
         <Checkbox className='check-box' label={checkOption} key={index} onChange={(e,data)=>onChange(e, {[data.label]:data.checked},null,'checkbox' )} />
     )} 
     </div>
-// onChange={(e,data)=>saveData(position, {[data.label]:data.checked} )}
 export default CustomCheckbox;

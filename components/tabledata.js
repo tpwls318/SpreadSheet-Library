@@ -38,13 +38,11 @@ class TableData extends React.Component {
         this.props.setSelection([minPos,maxPos])
         for (let rowI = condition[0]; rowI <= condition[1]; rowI++) {
             for (let colI = condition[2]; colI <= condition[3]; colI++) {
-                // console.log('row, col :',rowI,colI);
                 this.props.saveState([rowI,colI], 'selected', true)
             }   
         }
     }
     onClick = e => {
-        // e.preventDefault();
         const { row, col }=this.eventToCellLocation(e);
         const { 
                 changeCurCell,
@@ -56,15 +54,11 @@ class TableData extends React.Component {
                 toggleSelectionStarted,
                 setSelection, 
               } = this.props;
-        // console.log('row, col, curCell: ',row, col, curCell);
-        // console.log('e.type,selectionStarted: ',e.type,selectionStarted);
         if( e.ctrlKey || e.metaKey ){
             if( e.type === 'click'){
                 changeCurCell([row,col]);
                 saveState([row,col], 'selected', !cellState.selected)
                 setSelection([[row,col],[row,col]])
-                // console.log('selections,cellState',selections,cellState);
-                // console.log(e.type);
             }
         }
         else if ( e.shiftKey ){
@@ -77,31 +71,22 @@ class TableData extends React.Component {
                     saveState(position, 'selected', false)
                 }); 
                 let pos=[row, col];
-                // console.log('curCell,pos: ',curCell, pos);
                 curCell[0]<=row ? 
                 curCell[1]<=col ? this.shiftSelect('LL',...pos): this.shiftSelect('LS',...pos) :
                 curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
-                // console.log('cellState',cellState);
             }
         }
         else if( e.type === 'click' || (e.type === 'mousedown' && !e.button ) || e.type === 'touchstart'){
             if( e.type !== 'click' )
                 toggleSelectionStarted(true)
-            
-            // console.log(e.type);
             changeCurCell([row,col]);
             setSelection(false)
             selections.forEach(position => {
                 saveState(position, 'selected', false)
             });
-            // console.log('selections,curCell,cellState',selections, curCell,cellState,e.button);
         }         
     }
     onMouseMove = e => {
-        // console.log(this.props.selectedArea);
-        
-        
-    
         if (this.props.selectionStarted) {
             e.preventDefault();
             const { row, col }=this.eventToCellLocation(e);
@@ -109,16 +94,13 @@ class TableData extends React.Component {
              acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
              ,[]);
             this.props.setSelection(false)
-            // console.log('selections',this.props.selections);
             selections.forEach((position,i) => {
                 this.props.saveState(position, 'selected', false)
             }); 
-            // console.log(this.props.curCell);
             let pos=[row, col];
             this.props.curCell[0]<=row ? 
             this.props.curCell[1]<=col ? this.shiftSelect('LL',...pos): this.shiftSelect('LS',...pos) :
             this.props.curCell[1]<=col ? this.shiftSelect('SL',...pos): this.shiftSelect('SS',...pos)
-            // console.log('cellState',this.props.cellState);
         }
     }
     handleTouchStartCell = e => {
@@ -131,7 +113,7 @@ class TableData extends React.Component {
     deformation = (format, ...values) => {
         return format ? values.map(value=> `${value}`.split(',').join('')) : values;
     }
-    onChangeCycle = (type, format, row, col, ...values) => {
+    onChangeCycle = (doCycle, type, format, row, col, ...values) => {
         let applychange = this.props.beforeChange(type, row, col, ...this.deformation(format, ...values))
         if( applychange )
         {
@@ -140,12 +122,34 @@ class TableData extends React.Component {
                     format ? this.formation(Number(applychange.value), format)
                             :applychange.value: values[1]);
             this.props.afterChange(type, row, col,...this.deformation(format, ...values));
+        }   
+    }
+    onKeyDown = (e, data, format, type) => {
+        if(e.which===13){
+            console.log(e.target.value);
+            let curVal, nextVal;
+            switch (type) {
+                case 'numeric':
+                    curVal = format ? 
+                    this.formation(Number(e.target.value), format):
+                    e.target.value;
+                    break;
+                case 'checkbox':
+                    curVal = data;
+                    break;
+                case 'dropdown':
+                    curVal = data.value;
+                    break;
+                default:
+                    curVal = e.target.value;
+                    break;
+            }
+            return this.onChangeCycle(true, type, format, this.state.rowIndex, this.state.colIndex, this.props.datum, curVal, nextVal=null)
         }
     }
     onChange = (e, data, format, type) => {
         let curVal, nextVal;
         e.preventDefault();
-        // saveData(position, {[data.label]:data.checked});
         switch (type) {
             case 'numeric':
                 curVal = format ? 
@@ -162,12 +166,8 @@ class TableData extends React.Component {
                 curVal = e.target.value;
                 break;
         }
-        // curVal = 
-        //     data? data.value: 
-        //         format ? this.formation(Number(e.target.value), format):
-        //         e.target.value
-        return this.onChangeCycle(type, format, this.state.rowIndex, this.state.colIndex, this.props.datum, curVal, nextVal=null)
-
+        this.props.saveData([this.state.rowIndex, this.state.colIndex], curVal)
+        // return this.onChangeCycle(false, type, format, this.state.rowIndex, this.state.colIndex, this.props.datum, curVal, nextVal=null)
     };
     formation = (number, format) => {
         let f=format.split(',').pop().length
@@ -203,6 +203,7 @@ class TableData extends React.Component {
           col: target.cellIndex - 1
         };
       };
+    
     render() {
         // console.log('props in TableData!!!!',this.props);
         const { colWidths, datum, index, saveData, columnData, curCell, colHeaderState, cellState, selectedArea, rowIndex, colIndex} = this.props;
@@ -219,14 +220,15 @@ class TableData extends React.Component {
                 return <Td colWidths={colWidths} className={colClass} hidden={cellState.hidden}>
                     <input 
                         type={ this.state.isText ? 'text' : 'number' }
-                        onFocus={(e)=>{e.preventDefault();e.target.select()}}
-                        // onFocus={()=>{(this.setState(prevState=>({isText: false})));this.onClick();}}
+                        onFocus={e=>{e.preventDefault();e.target.select()}}
                         onBlur={()=>(this.setState(prevState=>({isText: true})))}
                         className={'numeric '+colClass}
-                        onClick={(e)=>{
+                        onDoubleClick={e=>console.log(e.target.blur())}
+                        onClick={e=>{
                             this.setState(prevState=>({isText: false}));
                             this.onClick(e);
                         }}
+                        onKeyDown={(e, data)=>this.onKeyDown(e, data, columnData.format, columnData.type)}
                         onTouchStart={this.onClick}
                         onMouseDown={this.onClick}
                         onTouchMove={this.onMouseMove}
@@ -282,6 +284,7 @@ class TableData extends React.Component {
                         name='name'
                         className={colClass}
                         onClick={this.onClick}
+                        onKeyDown={(e, data)=>this.onKeyDown(e, data, null, columnData.type)}
                         onChange={this.onChange}
                         onTouchStart={this.onClick}
                         onMouseDown={this.onClick}

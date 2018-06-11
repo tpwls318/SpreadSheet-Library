@@ -14,7 +14,6 @@ class Table extends React.Component {
         window.addEventListener("mouseup", this.handleEnd);
         window.addEventListener("touchend", this.handleEnd);
     };
-    
     componentWillUnmount = () => {
     window.removeEventListener("mouseup", this.handleEnd);
     window.removeEventListener("touchend", this.handleEnd);
@@ -35,7 +34,6 @@ class Table extends React.Component {
         else formattedNumber=number+formattedNumber;
         return formattedNumber;
     }
-
     collectSelections = ( obj, item ) => {
         if (typeof item !== 'string') {
             for (const key in item) {
@@ -46,7 +44,6 @@ class Table extends React.Component {
         else obj[item] = obj[item] ? obj[item]+1 : 1
         return obj;
     }
-
     viewSelections = ( obj ) => {
         let result=[];
         for (const key in obj) {
@@ -71,6 +68,66 @@ class Table extends React.Component {
             str+=`${arr[i]},&` : str+=`${arr[i]}, `
         }
         return str.split('&');
+	}
+	onKeyDown = e => {
+		const { curCell, changeCurCell, data } = this.props;
+		length=document.getElementsByClassName("recent-selected").length
+		let curElement = length===1? 
+		document.getElementsByClassName("recent-selected")[0] :
+		document.getElementsByClassName("recent-selected")[1]
+
+		const findParent = (curElement, nodeName) => {
+			while (curElement.nodeName !== nodeName){
+				curElement = curElement.parentNode;
+			}
+			return curElement;
+		}
+		const findInput = (curElement) => {
+			while (curElement.nodeName !== 'INPUT'){
+				curElement = curElement.childNodes[0];
+			}
+			return curElement;
+		}
+		switch (e.which) {
+			case 37:
+				if(curCell[1]>0) {
+					changeCurCell([curCell[0],curCell[1]-1]);
+					curElement = findParent(curElement, "TD");
+					findInput(curElement.previousSibling).focus();
+				} else if (curCell[0]>0){
+					changeCurCell([curCell[0]-1,data[0].length-1]);
+					curElement = findParent(curElement, "TD");
+					findInput(findParent(curElement, "TR").previousSibling.lastChild).focus();
+				}
+				break;
+			case 38:
+				if(curCell[0]>0) {
+					changeCurCell([curCell[0]-1,curCell[1]]);
+					curElement = findParent(curElement, "TD");
+					findInput(findParent(curElement, "TR").previousSibling.childNodes[curCell[1]+1]).focus();
+				}
+				break;
+			case 39:
+				if(curCell[1]<data[0].length-1) {
+					changeCurCell([curCell[0],curCell[1]+1]);
+					curElement = findParent(curElement, "TD");
+					findInput(curElement.nextSibling).focus();
+				} else if (curCell[0]<data.length-1){
+					changeCurCell([curCell[0]+1,0]);
+					curElement = findParent(curElement, "TD");
+					findInput(findParent(curElement, "TR").nextSibling.childNodes[1]).focus();
+				}
+				break;
+			case 40:
+				if(curCell[0]<data.length-1){
+					changeCurCell([curCell[0]+1,curCell[1]]);
+					curElement = findParent(curElement, "TD");
+					findInput(findParent(curElement, "TR").nextSibling.childNodes[curCell[1]+1]).focus();
+				}
+				break;
+			default:
+				break;
+		}
     }
 
     render() {
@@ -86,15 +143,11 @@ class Table extends React.Component {
         const selections = cellState.reduce( (acc,e,rowI) => 
              acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
         ,[]);
-        // console.log('selection',cellState.reduce( (acc,e,rowI) => 
-		// acc.concat(e.map( (e, colI) => [rowI, colI, e.selected] ).filter(e=>e.pop()) )
-//    ,[]));
-		
         return (
-            <div style={{margin:'50px',width:'850px',height:'1000px',overflow: 'scroll',border: '1.3px solid'}}>
+            <div style={{marginLeft:'50px',width:'850px',height:'1000px',overflow: 'scroll',border: '1.3px solid'}}>
                 <ContextMenu />
 				<div style={{width:'983px',height:'1185px'}}>
-                <table className="table">
+                <table className="table" onKeyDown={this.onKeyDown} >
                     <tbody >
                         {nestedHeaders.map(
                             (nestedHeader, index) => 
@@ -157,7 +210,7 @@ Table.propTypes={
     // Header: PropTypes.Component.isRequired
 }
 const mapStateToProps = state => {
-    const { data, nestedHeaders, colWidths, columns, cellState, curCell, selectionStarted, selectedArea } = state;
+    const { data, nestedHeaders, colWidths, columns, cellState, curCell, selectionStarted, selectedArea, changeCurCell } = state;
     return {
         data,
         nestedHeaders,
@@ -167,6 +220,7 @@ const mapStateToProps = state => {
         curCell,
 		selectionStarted,
 		selectedArea,
+		changeCurCell,
     }
 }
 const mapDispatchToProps = dispatch =>

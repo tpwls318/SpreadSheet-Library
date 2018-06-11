@@ -60,16 +60,12 @@ class RowHeader extends React.Component {
             }
         }
         else if( (e.type === 'mousedown' && !e.button ) || e.type === 'touchstart'){
-            console.log(e.type);
-
             toggleSelectionStarted(true)
             changeCurCell([row,0]);
             setSelection(false)
             selections.forEach(position => {
                 saveState(position, 'selected', false)
             });
-
-            // console.log('selections,curCell,cellState',selections, curCell,cellState);
         } else if (e.type === 'click') {
             changeCurCell([row,0]);
             setSelection(false)

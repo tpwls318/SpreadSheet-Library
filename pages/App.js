@@ -9,7 +9,10 @@ let store = createStore(reducer);
 
 export default () => (
     <Provider store={store}>
+        <div>        
+        <h1 >Spread Sheet</h1>
         <Table />  
+        </div>
     </Provider>
 );
 
