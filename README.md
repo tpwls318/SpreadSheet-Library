@@ -13,9 +13,13 @@
 
 ## Features 
 - Nested Headers
-- Selection
- - drag
- - header click
- - shift / cmd click
+- Collapsible Headers
+- Selection :
+  drag |
+  header click |
+  shift / cmd click
 - Keyboard Navigation
+- Context Menu
+- Reduced value presentable
+- Pre / Post processor for data changing & header collapsing
 
