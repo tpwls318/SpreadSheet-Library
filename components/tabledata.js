@@ -190,17 +190,17 @@ class TableData extends React.Component {
     eventToCellLocation = e => {
         let target;
         if (e.touches) {
-          const touch = e.touches[0];
-          target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const touch = e.touches[0];
+            target = document.elementFromPoint(touch.clientX, touch.clientY);
         } else {
-          target = e.target;
+            target = e.target;
         }
         while (target.tagName !== "TD") {
             target = target.parentNode;
-          }
+        }
         return {
-          row: target.parentNode.rowIndex - this.props.headerLength,
-          col: target.cellIndex - 1
+            row: target.parentNode.rowIndex - this.props.headerLength,
+            col: target.cellIndex - 1
         };
       };
     

@@ -47,25 +47,21 @@ class Header extends React.Component {
         let span = Array.from({length: colSpan||1},(e,j)=>colSpan?i-colSpan+1+j:i+j);
         let curHeaderNode = headerStateTree.BFSelect((label, depth)=>depth===CHI+1)[index];
         if (e.target.tagName === 'I') {
-            // console.log('i, colSpan, CHI, span: ', i, colSpan, CHI, span);
             let headerObj = this.valuesToObject(data, span);
             let firstChild=curHeaderNode.children[0];
             let sumOfCOls =
             beforeHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
-            // console.log('sumOfCOls',sumOfCOls);
             while(firstChild.children.length) 
                 firstChild=firstChild.children[0]
             let firstIndex = nestedHeaders[nestedHeaders.length-1].indexOf(firstChild.label);
             if( curHeaderNode.children[0].colspan && !curHeaderNode.children[0].isCollapsed){
                 sumOfCOls.forEach((val,i) => {
-                    // console.log('sumTemp', val);
                     saveState([i,firstIndex], 'sumTemp', !curHeaderNode.isCollapsed ? val: !curHeaderNode.isCollapsed )
                 });
             } else{
                 sumOfCOls.forEach((val,i) => {
                     saveState([i,firstIndex], 'sum', !curHeaderNode.isCollapsed ? val: !curHeaderNode.isCollapsed )
                     if(!this.state.isExtended){
-                        // console.log('sum', val);
                         saveState([i,firstIndex], 'sumTemp', !curHeaderNode.isCollapsed )
                     }
                 }); 
@@ -73,52 +69,7 @@ class Header extends React.Component {
             setColHeaderState([CHI, span.slice(curHeaderNode.children[0].colspan || 1), index], 'isCollapsed', !curHeaderNode.isCollapsed)
             afterHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
         }
-        // if (e.target.tagName === 'I') {
-        //     console.log(`CHI: ${JSON.stringify(headerStateTree.BFSelect(
-        //         (lable, depth)=>depth===CHI+1
-        //     ).map(e=>e.label))}`);
-            
-        //     console.log('button : ', e.target.tagName);
-        //     console.log('i, colSpan, CHI, span: ', i, colSpan, CHI, span);
-        //     let headerObj = this.valuesToObject(data, span);
-        //     let sumOfCOls =
-        //     beforeHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
-        //     console.log('sumOfCOls',sumOfCOls);
-        //     let [first, ...rest] = span;
-        //     rest.pop();
-        //     // if(cellState.reduce( (acc,row)=> acc.map((e,i)=>({...e,...row[i]}))).slice(rest[0],rest[rest.length-1]+1)
-        //     // .every(e=>e.hidden) )
-        //     console.log('cellState[0]: ',cellState[0].slice(rest[0],rest[rest.length-1]+1).every(e=>e.hidden));
-            
-        //     if( CHI===1 || cellState[0].slice(rest[0],rest[rest.length-1]+1).every(e=>e.hidden) )
-        //     {
-        //         console.log('abcabac',JSON.stringify(cellState[0]));
-        //         sumOfCOls.forEach((val,i) => {
-        //             saveState([i,span[0]], 'sum', this.state.isExtended ? val: this.state.isExtended )
-        //             if(!this.state.isExtended){
-        //                 console.log('sum', val);
-        //                 saveState([i,span[0]], 'sumTemp', this.state.isExtended )
-        //             }
-        //         }); 
-        //     }
-                
-        //     else {
-        //         sumOfCOls.forEach((val,i) => {
-        //             console.log('sumTemp', val);
-        //             saveState([i,span[0]], 'sumTemp', this.state.isExtended ? val: this.state.isExtended )
-        //         });
-        //     }
-        //     this.setState(prev=>({isExtended: !prev.isExtended}))
-        //     span=span.slice(this.headersToSpan(nestedHeaders)[CHI][i-colSpan+1][0])
-        //     console.log('span!!!!!: ',span);
-        //     // headerStateTree.BFSelect((label, depth)=>depth===CHI+1)[index].isCollapsed
-        //     setColHeaderState([CHI, span], 'hidden', !colHeaderState[CHI][span[0]].hidden, [CHI,index])
-        //     afterHeaderCollapsed(span, Object.values(headerObj), Object.entries(headerObj));
-        //     console.log('zxczxczxc',JSON.stringify(cellState[0]));
-        // }
         else {
-            // console.log(e.type);
-            
             if( e.ctrlKey || e.metaKey ){
                 changeCurCell([`h${index}`,span]);
                 setSelection([[0,span[0]],[data.length-1,span[span.length-1]]])
@@ -158,38 +109,10 @@ class Header extends React.Component {
             } 
         }
     }
-    wrap = (arr1, arr2) => {
-        return arr1.map((e,i)=>{
-            let arr=[];
-            while (e-arr2[arr2.length-1]>0 || (arr.length && e-arr2[arr2.length-1]===0) )
-            { e-=arr2[arr2.length-1]; arr.push(arr2.pop()); }
-            return arr.length ? arr : arr2.pop();
-        })
-    }
-    // headersToSpan = (NH, arr=[]) => {
-    //     NH
-    //     .map(e1=>e1.map(e2=>e2.colspan?e2.colspan:1))
-    //     .reduce( (acc,e,i,array)=>array[arr.push(this.wrap([...acc],[...e].reverse()) )])
-    //     return arr;
-    // }
+
     foldHeader = (curHeader) => 
         curHeader.children.reduce( (acc, child) => acc+=child.hidden ? 0: (child.isCollapsed||!child.colspan) ? 1 :child.colspan ,0)
 
-        
-    
-    // foldHeader = (CHI, i, colSpan) => {
-        // console.log('i-colSpan+1',i-colSpan+1,i);
-
-    //     let arr=[];
-    //     for (let j = colSpan?i-colSpan+1:i; j <= i; j++) {
-    //         // console.log('Im here!!!!',CHI,j );
-    //         arr.push(this.props.colHeaderState.reduce((acc,e,index)=>{
-    //             // console.log('acc,e,index,e[j]',acc,e,index,e[j]);
-    //             return e[j].hidden?index:acc
-    //         }, null))
-    //     }
-    //     return arr.reduce((acc,e)=>(Number.isInteger(e))?acc+1:acc,0);
-    // }
     render() {
         console.log('props in header: ',this.props);
         const { isExtended } = this.state;
@@ -207,7 +130,6 @@ class Header extends React.Component {
                             scope="colgroup" 
                             colWidths={this.sum(colWidths,h.colspan)} 
                             colSpan={this.foldHeader(headerStateTree.BFSelect((lable, depth)=>depth===CHI+1)[index])}
-                            // colSpan={h.colspan-this.foldHeader(CHI, this.headerIndex(nestedHeader)[index], h.colspan)}
                             onClick={e=>this.selectColumn(e,this.headerIndex(nestedHeader)[index], h.colspan,CHI,index)}
                             key={index} 
                             hidden={headerStateTree.BFSelect((lable, depth)=>depth===CHI+1)[index].hidden}

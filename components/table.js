@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import ContextMenu from "./contextMenu";
 import { bindActionCreators } from "redux";
 import actionCreators from "../redux/actions/action";
+import styled from "styled-components";
 
 class Table extends React.Component {
     componentDidMount = () => {
@@ -184,18 +185,18 @@ class Table extends React.Component {
                             {data[0].map(
                                 (e, index) => 
                                 columns[index].type==='dropdown' ? 
-                                <td key={index} >{ `${this.viewSelections( data.reduce( (acc,e)=> this.collectSelections( acc,e[index] ), {}) )}` }</td> :
+                                <Td key={index} >{ `${this.viewSelections( data.reduce( (acc,e)=> this.collectSelections( acc,e[index] ), {}) )}` }</Td> :
                                 columns[index].type==='numeric' ? 
-								<td key={index} hidden={cellState[0][index].hidden}>
+								<Td key={index} hidden={cellState[0][index].hidden}>
 								{
 									cellState[0][index].sum?
 									this.formation(cellState.reduce( (acc,e,i)=>( acc+parseInt(`${e[index].sumTemp || e[index].sum }`.split(',').join(''))), 0),columns[index].format ):
 									this.formation(data.reduce( (acc,e)=>( acc+parseInt(`${e[index]}`.split(',').join(''))), 0),columns[index].format )
-								}</td> :
+								}</Td> :
                                 columns[index].type==='checkbox' ? 
-                                <td key={index} className='checkbox-arr'>{ this.groupingInToFive(data.reduce( (acc,e)=> this.binarify(acc, e[index]), []))
-                                .map((e,i)=><div key={i}>{e.toString()}</div>)  }</td> :
-                                <td key={index} >{data.reduce( (acc,e)=>( acc+parseInt(e[index]) ), 0) }</td>
+                                <Td key={index} className='checkbox-arr'>{ this.groupingInToFive(data.reduce( (acc,e)=> this.binarify(acc, e[index]), []))
+                                .map((e,i)=><div key={i}>{e.toString()}</div>)  }</Td> :
+                                <Td key={index} >{data.reduce( (acc,e)=>( acc+parseInt(e[index]) ), 0) }</Td>
                             )} 
                         </tr>
                     </tbody>
@@ -205,7 +206,9 @@ class Table extends React.Component {
         )
     }
 }
-
+const Td = styled.td`
+	text-align: center
+`
 Table.propTypes={
     // Header: PropTypes.Component.isRequired
 }

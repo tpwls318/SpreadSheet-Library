@@ -118,7 +118,7 @@ class RowHeader extends React.Component {
                     onMouseDown={this.onClick}
                     onTouchMove={this.onClick}
                     onMouseMove={this.onMouseMove}
-                >{this.props.rowIndex}</th>)
+                >{this.props.rowIndex+1}</th>)
     }
 }
 
